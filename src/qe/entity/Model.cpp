@@ -83,7 +83,7 @@ Model::Model( const QMetaObject* metaObj)
 const QString& Model::name() const noexcept
 { return m_name; }
 
-const EntityDefList& Model::columnDefs() const noexcept
+const EntityDefList& Model::entityDefs() const noexcept
 { return m_entityDefs; }
 
 const EntityDefList& Model::primaryKeyDef() const noexcept

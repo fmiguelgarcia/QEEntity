@@ -52,7 +52,7 @@ namespace qe { namespace entity
 			const QString& name() const noexcept;
 
 			/// @return Model column definitions.
-			const EntityDefList& columnDefs() const noexcept;
+			const EntityDefList& entityDefs() const noexcept;
 
 			/// @return Model primary key definition.
 			const EntityDefList& primaryKeyDef() const noexcept;
