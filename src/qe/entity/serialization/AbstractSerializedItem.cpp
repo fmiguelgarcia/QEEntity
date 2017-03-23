@@ -27,4 +27,16 @@
 #include "AbstractSerializedItem.hpp"
 using namespace qe::entity;
 
+AbstractSerializedItem::AbstractSerializedItem( const QVariantList & pk)
+	: m_primaryKeyValues( pk)
+{}
+
+AbstractSerializedItem::AbstractSerializedItem( QVariantList && pk)
+	: m_primaryKeyValues( std::move(pk))
+{}
+
 AbstractSerializedItem::~AbstractSerializedItem() = default;
+
+
+const QVariantList& AbstractSerializedItem::primaryKey() const noexcept
+{ return m_primaryKeyValues; }

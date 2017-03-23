@@ -25,11 +25,21 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <QVariantList>
+
 namespace qe { namespace entity {
 
 	class AbstractSerializedItem
 	{
 		public:
+			AbstractSerializedItem( const QVariantList & pk);
+			AbstractSerializedItem( QVariantList && pk = QVariantList{});
+
 			virtual ~AbstractSerializedItem();
+
+			const QVariantList& primaryKey() const noexcept;
+
+		private:
+			QVariantList m_primaryKeyValues;			
 	};
 }}
