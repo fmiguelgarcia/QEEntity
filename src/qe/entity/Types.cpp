@@ -25,37 +25,51 @@
  */
 #include "Types.hpp"
 
-namespace qe { namespace entity { namespace tags {
+namespace qe { namespace entity { 
 
-	QString entityName() noexcept
-	{ return QStringLiteral( "@qe.entity.name");}
+	ScopedStackedObjectContext::ScopedStackedObjectContext( QObject* obj, 
+		ObjectContext &context)
+		: m_context( context)
+	{
+		m_context.push_back( obj);
+	}
 
-	QString isNullable() noexcept
-	{ return QStringLiteral( "@qe.entity.isNullable");}
+	ScopedStackedObjectContext::~ScopedStackedObjectContext()
+	{
+		m_context.pop_back();
+	}
+	
+	namespace tags {
 
-	QString isAutoIncrementable() noexcept
-	{ return QStringLiteral( "@qe.entity.isAutoIncrementable");}
+		QString entityName() noexcept
+		{ return QStringLiteral( "@qe.entity.name");}
 
-	QString entityMaxLength() noexcept
-	{ return QStringLiteral( "@qe.entity.maxLength");}
+		QString isNullable() noexcept
+		{ return QStringLiteral( "@qe.entity.isNullable");}
 
-	QString mappingType() noexcept
-	{ return QStringLiteral( "@qe.entity.mapping.type");}
+		QString isAutoIncrementable() noexcept
+		{ return QStringLiteral( "@qe.entity.isAutoIncrementable");}
 
-	QString mappingEntity() noexcept
-	{ return QStringLiteral( "@qe.entity.mapping.entity");}
+		QString entityMaxLength() noexcept
+		{ return QStringLiteral( "@qe.entity.maxLength");}
 
-	QString primaryKey() noexcept
-	{ return QStringLiteral( "@qe.entity.primaryKey");}
+		QString mappingType() noexcept
+		{ return QStringLiteral( "@qe.entity.mapping.type");}
 
-	QString isParentExported() noexcept
-	{ return QStringLiteral( "@qe.entity.isParentExported");}
+		QString mappingEntity() noexcept
+		{ return QStringLiteral( "@qe.entity.mapping.entity");}
 
-	QString isEnabled() noexcept
-	{ return QStringLiteral( "@qe.entity.isEnabled");}
+		QString primaryKey() noexcept
+		{ return QStringLiteral( "@qe.entity.primaryKey");}
 
-	QString modelName() noexcept
-	{ return QStringLiteral( "@qe.model.name");}
+		QString isParentExported() noexcept
+		{ return QStringLiteral( "@qe.entity.isParentExported");}
+
+		QString isEnabled() noexcept
+		{ return QStringLiteral( "@qe.entity.isEnabled");}
+
+		QString modelName() noexcept
+		{ return QStringLiteral( "@qe.model.name");}
 
 #if 0
 

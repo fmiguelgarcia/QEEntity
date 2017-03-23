@@ -32,6 +32,7 @@
 class QObject;
 namespace qe { namespace entity { 
 
+	// Forward declarations
 	class EntityDef;
 	class RelationDef;
 	class Model;
@@ -42,8 +43,20 @@ namespace qe { namespace entity {
 	using RelationDefList= std::vector<RelationDefShd>;
 	using ModelShd = std::shared_ptr<Model>;
 
+	// Context
 	using ObjectContext = std::deque<QObject*>;
+	class ScopedStackedObjectContext
+	{
+		public:
+			ScopedStackedObjectContext( QObject* obj, 
+					ObjectContext &context);
+			~ScopedStackedObjectContext();
 
+		private:
+			ObjectContext &m_context;
+	};
+
+	// Tags
 	namespace tags {
 		QString modelName() noexcept;
 
