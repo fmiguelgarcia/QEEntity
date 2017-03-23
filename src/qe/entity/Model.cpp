@@ -89,8 +89,8 @@ const EntityDefList& Model::entityDefs() const noexcept
 const EntityDefList& Model::primaryKeyDef() const noexcept
 { return m_primaryKeyDef; }
 
-// const ForeignKeyDefList& Model::referencesManyToOneDefs() const noexcept
-// { return m_referencesManyToOneDefs; }
+const RelationDefList & Model::referencesManyToOneDefs() const noexcept
+{ return m_referencesManyToOneDefs; }
 
 void Model::addReferenceManyToOne( const QByteArray& propertyName, 
 		const ModelShd &reference)
