@@ -71,7 +71,7 @@ void EntityDef::decodeProperties(const qe::annotation::Model &model)
 		qe::entity::tags::entityName()).value( propName).toString();
 
 	m_isNullable = model.annotation( propName, 
-			tags::isNullable()).value( false).toBool();
+			tags::isNullable()).value( true).toBool();
 
 	m_isAutoIncrement = model.annotation( propName, 
 			tags::isAutoIncrementable()).value( false).toBool();
