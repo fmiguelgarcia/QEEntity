@@ -117,7 +117,10 @@ void Model::addReferenceManyToOne( const QByteArray& propertyName,
 				colDef = findEntityDef( findByEntityName{ fkColName });
 			}
 		}
+		
+		// Update RelationDef 
 		fkColDef->setEntityName( fkColName);
+		fkColDef->setMappingType( EntityDef::MappingType::ManyToOne);
 		m_entityDefs.push_back( fkColDef);
 	}
 

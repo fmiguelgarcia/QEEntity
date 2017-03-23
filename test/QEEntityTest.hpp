@@ -1,9 +1,9 @@
 #pragma once
+#include <qe/entity/Types.hpp>
 #include <QObject>
 #include <memory>
 
 class Book;
-namespace qe { namespace entity { class Model;}}
 class QEEntityTest
 	: public QObject
 {
@@ -17,6 +17,7 @@ class QEEntityTest
 		void checkEntityIsEnable();
 		void checkEntityIsParentExported();
 		void checkEntityPrimaryKey();
+		void checkEntityReferenceOneToMany();
 		void checkEntityMappingEntity();
 		void checkEntityMappingType();
 		void checkEntityMaxLength();
@@ -26,7 +27,7 @@ class QEEntityTest
 		
 	private:
 		std::unique_ptr<Book> m_book;
-		std::unique_ptr<qe::entity::Model> m_bookModel;
-		std::unique_ptr<qe::entity::Model> m_chapterModel;
+		qe::entity::ModelShd m_bookModel;
+		qe::entity::ModelShd m_chapterModel;
 };
 

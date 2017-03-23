@@ -26,33 +26,27 @@
  */
 #pragma once
 #include <qe/entity/Types.hpp>
-class QMetaObject;
-class QObject;
+#include <map>
+#include <mutex>
 
-namespace qe { namespace entity { 
-	class AbstractSerializedItem;
-	class AbstractSerializer
+namespace qe { namespace entity {
+
+	class ModelRepository 
 	{
 		public:
-			virtual ~AbstractSerializer();
+			static ModelRepository& instance();
 
-			virtual void save( QObject* const source, 
-					AbstractSerializedItem* const target) const;
-
-			virtual void load( const AbstractSerializedItem* const source, 
-					QObject *const target) const;
-
-		protected:
-			virtual void save( ObjectContext& context, 
-					const ModelShd& model, QObject *const source, 
-					AbstractSerializedItem *const target) const = 0;
-
-			virtual void load( ObjectContext& context, 
-					const ModelShd& model, 
-					const AbstractSerializedItem *const source,
-					QObject *const target) const = 0;
+			/// @brief It gets the Orm model associated to @p metaObject.
+			ModelShd model( const QMetaObject *metaObject) const;
 
 		private:
-			ModelShd checkAndGetModel( const QMetaObject* metaObject) const;
+			ModelRepository();
+			ModelRepository( const ModelRepository&) = delete;
+		
+			ModelShd makeModel( const QMetaObject* metaObj) const;
+
+		private:
+			mutable std::recursive_mutex m_modelsMtx;
+			mutable std::map<const QMetaObject*, ModelShd> m_models;
 	};
 }}

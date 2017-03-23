@@ -25,34 +25,13 @@
  * $QE_END_LICENSE$
  */
 #include "AbstractSerializer.hpp"
+#include <qe/entity/ModelRepository.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/common/Exception.hpp>
 
 using namespace qe::entity;
 using namespace qe::common;
 using namespace std;
-
-/// @brief Utility to use double check locking and create/insert objects
-/// into a map if they do NOT exist previously.
-template <typename V,  typename K, typename M, typename F>
-V findOrCreateUsingDoubleCheckLocking( 
-		std::map<K,V>& container, K& key, M& mutex, 
-		const F& createFunc)
-{
-	auto itr = container.find( key);
-	if( itr == std::end( container))
-	{
-		std::lock_guard<M> _( mutex);
-		itr = container.find( key);
-		if( itr == std::end( container))
-		{
-			V value = createFunc(); 
-			itr = container.insert(
-					std::make_pair( key, value) ).first;
-		}
-	}
-	return itr->second;
-}
 
 const QMetaObject* checkAndGetMetaObject( QObject* const obj)
 {
@@ -73,13 +52,6 @@ const QMetaObject* checkAndGetMetaObject( QObject* const obj)
 
 AbstractSerializer::~AbstractSerializer() = default;
 		
-ModelShd AbstractSerializer::model( const QMetaObject *metaObject) const
-{
-	return findOrCreateUsingDoubleCheckLocking( 
-		m_models, metaObject, m_modelsMtx, 
-		[metaObject](){ return make_shared<Model>(metaObject);});
-}
-
 void AbstractSerializer::save( QObject* const source, 
 	AbstractSerializedItem* const target) const
 {
@@ -102,7 +74,7 @@ void AbstractSerializer::load( const AbstractSerializedItem* const source,
 
 ModelShd AbstractSerializer::checkAndGetModel( const QMetaObject* metaObject) const
 {
-	ModelShd lmodel = model( metaObject);
+	ModelShd lmodel = ModelRepository::instance().model( metaObject);
 	if( !lmodel)
 		Exception::makeAndThrow( 
 				QStringLiteral( "Serializer cannot find a model for object class ")

@@ -32,20 +32,18 @@ class QMetaObject;
 namespace qe { namespace entity
 {
 	class ModelPrivate;
+	class ModelRepository;
 
 	/// @brief This model parse the Orm annotations
 	class Model : public qe::annotation::Model
 	{
-		friend class QEOrm;
+		friend class qe::entity::ModelRepository;
 		public:
 			using FindColDefPredicate = std::function<bool(const EntityDefShd&)>;
 
 			struct findByPropertyName { const QByteArray name; };
 			struct findByEntityName { const QString name; };
 			struct findByAutoIncrement {};
-
-			/// @brief Create and parse annotations from @p meta.
-			explicit Model( const QMetaObject* meta);
 
 			// DB 	
 			/// @return Database table name.
@@ -82,8 +80,11 @@ namespace qe { namespace entity
 			const RelationDefShd findRelationTo( const ModelShd& model) const noexcept;	
 
 		protected:
-			Model( const Model&);
-			Model& operator=( const Model&);
+			/// @brief Create and parse annotations from @p meta.
+			explicit Model( const QMetaObject* meta);
+
+			Model( const Model&) = delete;
+			Model& operator=( const Model&) = delete;
 
 		private:
 			/// @brief It parses the annotation from @p meta.

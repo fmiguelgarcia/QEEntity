@@ -86,6 +86,9 @@ namespace qe { namespace entity {
 			inline const MappingType mappingType() const noexcept
 			{ return m_mappingType;}
 
+			void setMappingType( const MappingType mt) noexcept
+			{ m_mappingType = mt;}
+
 			inline const MappingFetch mappingFetch() const noexcept
 			{ return m_mappingFetch;}
 			

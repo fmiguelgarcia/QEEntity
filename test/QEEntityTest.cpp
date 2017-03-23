@@ -1,8 +1,10 @@
 #include "QEEntityTest.hpp"
 #include "entity/book.hpp"
 
+#include <qe/entity/ModelRepository.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/EntityDef.hpp>
+#include <qe/entity/RelationDef.hpp>
 #include <QTest>
 #include <memory>
 
@@ -16,8 +18,8 @@ QEEntityTest::QEEntityTest()
 	m_book->chapters.emplace_back( "Chapter 2");
 
 	// Models
-	m_bookModel.reset( new Model( m_book->metaObject()));
-	m_chapterModel.reset( new Model( m_book->chapters.front().metaObject()));
+	m_bookModel = ModelRepository::instance().model( m_book->metaObject());
+	m_chapterModel = ModelRepository::instance().model( m_book->chapters.front().metaObject());
 }
 
 QEEntityTest::~QEEntityTest()
@@ -49,6 +51,26 @@ void QEEntityTest::checkEntityIsParentExported()
 
 void QEEntityTest::checkEntityPrimaryKey()
 { }
+
+void QEEntityTest::checkEntityReferenceOneToMany()
+{
+	auto relations = m_chapterModel->referencesManyToOneDefs();
+	QVERIFY( relations.size() == 1);
+
+	for( const auto& relation: relations)
+	{
+		const EntityDefList& relationKey = relation->relationKey();
+	  	for( const auto& eDef: relationKey)
+		{
+			QVERIFY( eDef->mappingType() == EntityDef::MappingType::ManyToOne);
+			
+			const auto rDef = m_bookModel->findEntityDef( 
+				Model::findByPropertyName{ eDef->propertyName()});
+
+			QVERIFY( rDef.get() != nullptr);
+		}	
+	}
+}
 
 void QEEntityTest::checkEntityMappingEntity()
 { 

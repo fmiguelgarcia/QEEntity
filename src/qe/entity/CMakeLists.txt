@@ -7,7 +7,7 @@ set( QEEntity_BUILD_VERSION 0)
 # Source
 set( QEEntity_SRCS 
 	Types.cpp EntityDef.cpp RelationDef.cpp
-	Model.cpp)
+	Model.cpp ModelRepository.cpp)
 add_subdirectory( serialization)
 
 # Link
