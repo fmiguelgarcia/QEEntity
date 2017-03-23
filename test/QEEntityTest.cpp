@@ -90,10 +90,10 @@ void QEEntityTest::checkEntityIsAutoIncrementable()
 
 void QEEntityTest::checkEntityIsNullable()
 { 
-	auto entityDef = m_chapterModel->findEntityDef( Model::findByPropertyName{ "text"});
+	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "author"});
 	QVERIFY( entityDef && entityDef->isNullable());
 
-	entityDef = m_chapterModel->findEntityDef( Model::findByPropertyName{ "title"});
+	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
 	QVERIFY( entityDef && entityDef->isNullable() == false);
 }
 
