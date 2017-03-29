@@ -33,23 +33,32 @@
 
 using namespace qe::entity;
 using namespace std;
+Q_LOGGING_CATEGORY( qe::entity::lcModel,
+	"com.dmious.ipmo.qe.entity.model");
+
 namespace {
+	
+	QString classId() noexcept
+	{ return QStringLiteral("class");}
 
 	/// @brief It gets the primary keys from annotation.
 	/// 
 	/// If there is no explicit primary key, it will use the first
 	/// 'auto_increment' file as a primary key.
+	/// If there is not primary key neither 'auto_increment', then
+	/// all en
 	EntityDefList parsePrimaryKeys( const Model & model)
 	{
 		EntityDefList pk;
 		QStringList pkPropertyNames = model.annotation( 
-				QStringLiteral("class"),
+				classId(),
 				tags::primaryKey())
 			.value( QString()).toString()
 			.split( ',', QString::SkipEmptyParts);
 
 		if( pkPropertyNames.isEmpty())
 		{
+			// If empty, try 'auto_increment' entity.
 			EntityDefShd colDef = model.findEntityDef( Model::findByAutoIncrement{});
 			if( colDef)
 				pkPropertyNames << colDef->propertyName();
@@ -61,13 +70,32 @@ namespace {
 					Model::findByPropertyName{ pkPropName.toLocal8Bit()});
 			
 			if( colDef )
-			{
 				pk.push_back( colDef);
-				// colDef->isPartOfPrimaryKey = true;
-			}
 		}
+		
+		// If it is still empty, use all entities as primary key.
+		if( pk.empty())
+			pk = model.entityDefs();
 
 		return pk;
+	}
+
+	/// @brief It checks if property is register into Qt metatype system.
+	bool isPropertyTypeRegister( const QMetaObject* mo, const QMetaProperty& property)
+	{
+		const int propType = property.userType();
+		const bool isRegistered = QMetaType::isRegistered( propType);
+		
+		if( propType == QMetaType::Type::UnknownType ||
+			! isRegistered)
+		{
+			qCCritical( lcModel) << QString ("Property %1:%2 is not register and will be ignore."
+				"Please use QMetaType::qRegisterMetaType and Q_DECLARE_METATYPE")
+				.arg( mo->className()).arg( property.name());
+		}
+		
+		return propType != QMetaType::Type::UnknownType
+			&& isRegistered; 
 	}
 }
 
@@ -98,7 +126,7 @@ void Model::addReferenceManyToOne( const QByteArray& propertyName,
 	RelationDefShd fkDef = make_shared<RelationDef>( propertyName, reference);
 
 	// Fix fk column names to avoid duplicates.
-	for( auto & fkColDef	: fkDef->relationKey())
+	for( auto & fkColDef: fkDef->relationKey())
 	{
 		QString fkColName = fkColDef->entityName();
 		auto colDef = findEntityDef( findByEntityName{ fkColName });
@@ -128,18 +156,15 @@ void Model::addReferenceManyToOne( const QByteArray& propertyName,
 	m_referencesManyToOneDefs.push_back( fkDef);
 }
 
-
 void Model::parseAnnotations( const QMetaObject* metaObj)
 {
-	const QString classId = QStringLiteral( "class");
-
-	// Table
-	m_name = annotation( classId, 
+	// Class annotation 
+	m_name = annotation( classId(), 
 		qe::entity::tags::modelName())
 			.value( QString( metaObj->className())).toString();
 
-	// Columns			
-	const bool exportParents = annotation( classId,
+	// Entity 
+	const bool exportParents = annotation( classId(),
 		  qe::entity::tags::isParentExported())
 		.value( false).toBool();
 	const int begin = (exportParents) ? 0 : metaObj->propertyOffset();
@@ -147,16 +172,19 @@ void Model::parseAnnotations( const QMetaObject* metaObj)
 	for( int i = begin; i < metaObj->propertyCount(); ++i)
 	{
 		const QMetaProperty property = metaObj->property(i);
-		const QByteArray propertyName = property.name();
-		const bool isEnable = annotation( propertyName, 
-			qe::entity::tags::isEnabled())
-				.value( true).toBool();
-
-		if( isEnable )
+		if( isPropertyTypeRegister( metaObj, property))
 		{
-			EntityDefShd colDef = make_shared<EntityDef>( propertyName, 
-					property.type(), *this);
-			m_entityDefs.push_back( colDef);
+			const QByteArray propertyName = property.name();
+			const bool isEnable = annotation( propertyName, 
+											  qe::entity::tags::isEnabled())
+			.value( true).toBool();
+			
+			if( isEnable )
+			{
+				EntityDefShd colDef = make_shared<EntityDef>( propertyName, 
+															  property.type(), *this);
+				m_entityDefs.push_back( colDef);
+			}
 		}
 	}
 	
