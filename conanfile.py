@@ -28,4 +28,4 @@ class QEEntityConan(ConanFile):
                 src="src/qe/entity/serialization", links=True)
 
     def package_info(self):
-        self.cpp_info.libs.extend(["QEEntity", "QEEntityS11n"])
+        self.cpp_info.libs.extend(["QEEntity"])
