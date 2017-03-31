@@ -6,14 +6,13 @@ set( QEEntity_BUILD_VERSION 0)
 
 # Source
 set( QEEntity_SRCS 
+	AbstractSerializedItem.cpp AbstractSerializer.cpp
 	Types.cpp EntityDef.cpp RelationDef.cpp
 	Model.cpp ModelRepository.cpp)
-add_subdirectory( serialization)
 
 # Link
 add_library( QEEntity SHARED ${QEEntity_SRCS})
 target_link_libraries( QEEntity
-	QEEntityS11n
 	Qt5::Core ${CONAN_LIBS}) 
 set_target_properties( QEEntity PROPERTIES 
 	VERSION

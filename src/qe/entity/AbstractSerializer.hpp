@@ -26,11 +26,11 @@
  */
 #pragma once
 #include <qe/entity/Types.hpp>
-class QMetaObject;
+#include <qe/entity/AbstractSerializedItem.hpp>
+
 class QObject;
 
 namespace qe { namespace entity { 
-	class AbstractSerializedItem;
 	class AbstractSerializer
 	{
 		public:
