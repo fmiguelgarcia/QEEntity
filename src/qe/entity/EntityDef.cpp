@@ -64,6 +64,13 @@ EntityDef::EntityDef( const QByteArray &property, const int type,
 		m_entityMaxLength = 1;
 }
 
+EntityDef::EntityDef( const QByteArray &property, const QMetaEnum& me, 
+	const qe::annotation::Model &model)
+	: EntityDef( property, QMetaType::Int, model) 
+{
+	m_metaEnum.reset( new QMetaEnum(me));
+}
+
 void EntityDef::decodeProperties(const qe::annotation::Model &model)
 {
 	const QString propName = propertyName();

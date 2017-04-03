@@ -30,6 +30,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QVariant>
+#include <QMetaEnum>
 #include <memory>
 
 namespace qe { namespace annotation { class Model; }}
@@ -58,6 +59,10 @@ namespace qe { namespace entity {
 			/// @param type Property type.
 			/// @param model It will use this model to extract annotations.
 			EntityDef( const QByteArray &property, const int type, 
+					const qe::annotation::Model &model);
+
+			/// @brief It is a constructor for Enum types.
+			EntityDef( const QByteArray &property, const QMetaEnum& me, 
 					const qe::annotation::Model &model);
 
 			/// @brief  It creates a entity definition 
@@ -104,6 +109,16 @@ namespace qe { namespace entity {
 			inline bool isNullable() const noexcept
 			{ return m_isNullable;}
 
+			/// @brief It checks if this entity definition is an Enum.
+			inline bool isEnum() const noexcept
+			{ return m_metaEnum.get() != nullptr;}
+
+			/// @return It returns the meta-enum information if it is an Enum
+			/// entity or null in other case.
+			/// @see EntityDef#isEnum()
+			inline QMetaEnum* enumerator() const noexcept
+			{ return m_metaEnum.get();}
+
 		private:
 			EntityDef( const EntityDef& );
 
@@ -115,6 +130,7 @@ namespace qe { namespace entity {
 
 			const QByteArray m_propertyName;		///< Property name.
 			const int m_propertyType;				///< Property type.
+			std::unique_ptr<QMetaEnum> m_metaEnum;	///< It stores meta-enum info.
 
 			QString m_entityName;		///< DB column name
 			QVariant m_defaultValue;	///< Default value.

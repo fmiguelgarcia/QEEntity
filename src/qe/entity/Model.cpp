@@ -181,8 +181,15 @@ void Model::parseAnnotations( const QMetaObject* metaObj)
 			
 			if( isEnable )
 			{
-				EntityDefShd colDef = make_shared<EntityDef>( propertyName, 
-															  property.type(), *this);
+				EntityDefShd colDef;
+
+				if( property.isEnumType())
+					colDef = make_shared<EntityDef>( propertyName, 
+						property.enumerator(), *this);
+				else
+					colDef = make_shared<EntityDef>( propertyName, 
+						property.type(), *this);
+
 				m_entityDefs.push_back( colDef);
 			}
 		}
