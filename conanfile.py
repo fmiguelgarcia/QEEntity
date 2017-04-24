@@ -24,12 +24,10 @@ class QEEntityConan(ConanFile):
         self.copy( pattern="LICENSE.LGPLv3", dst="share/qe/entity")
         self.copy( pattern="libQEEntity.so*", dst="lib",
                 src="src/qe/entity", links=True)
-        self.copy( pattern="libQEEntityS11n.so*", dst="lib",
-                src="src/qe/entity/serialization", links=True)
-        self.copy( pattern="libQEEntityS11n.dll", dst="lib",
-                src="src/qe/entity/serialization/bin")
-        self.copy( pattern="libQEEntityS11n.dll.a", dst="lib",
-                src="src/qe/entity/serialization/lib")
+        self.copy( pattern="libQEEntity.dll", dst="lib",
+                src="src/qe/entity/bin")
+        self.copy( pattern="libQEEntity.dll.a", dst="lib",
+                src="src/qe/entity/lib")
 
     def package_info(self):
         self.cpp_info.libs.extend(["QEEntity"])
