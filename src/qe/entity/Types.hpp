@@ -24,6 +24,7 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <QString>
 #include <memory>
 #include <vector>
@@ -45,7 +46,7 @@ namespace qe { namespace entity {
 
 	// Context
 	using ObjectContext = std::deque<QObject*>;
-	class ScopedStackedObjectContext
+    class QEENTITY_EXPORT ScopedStackedObjectContext
 	{
 		public:
 			ScopedStackedObjectContext( QObject* obj, 
@@ -58,19 +59,19 @@ namespace qe { namespace entity {
 
 	// Tags
 	namespace tags {
-		QString modelName() noexcept;
+        QString QEENTITY_EXPORT modelName() noexcept;
 
-		QString entityName() noexcept;
-		QString entityMaxLength() noexcept;
-		QString isNullable() noexcept;
-		QString isAutoIncrementable() noexcept;
-		QString isParentExported() noexcept;
-		QString isEnabled() noexcept;
+        QString QEENTITY_EXPORT entityName() noexcept;
+        QString QEENTITY_EXPORT entityMaxLength() noexcept;
+        QString QEENTITY_EXPORT isNullable() noexcept;
+        QString QEENTITY_EXPORT isAutoIncrementable() noexcept;
+        QString QEENTITY_EXPORT isParentExported() noexcept;
+        QString QEENTITY_EXPORT isEnabled() noexcept;
 	
-		QString mappingType() noexcept;
-		QString mappingEntity() noexcept;
+        QString QEENTITY_EXPORT mappingType() noexcept;
+        QString QEENTITY_EXPORT mappingEntity() noexcept;
 	
-		QString primaryKey() noexcept;
+        QString QEENTITY_EXPORT primaryKey() noexcept;
 	}
 
 }}

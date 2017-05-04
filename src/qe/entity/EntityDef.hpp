@@ -26,6 +26,7 @@
  */
 
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <QLoggingCategory>
 #include <QString>
 #include <QByteArray>
@@ -41,7 +42,7 @@ namespace qe { namespace entity {
 
 	/// @brief This class defines the relation between a property and a database
 	/// column
-	class EntityDef
+    class QEENTITY_EXPORT EntityDef
 	{
 		Q_GADGET
 		public:

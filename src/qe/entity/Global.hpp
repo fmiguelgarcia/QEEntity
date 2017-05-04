@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 francisco miguel garcia rodriguez  
+ * Copyright (C) 2017 francisco miguel garcia rodriguez
  * Contact: http://www.dmious.com/qe/licensing/
  *
  * This file is part of the QE Common module of the QE Toolkit.
@@ -16,7 +16,7 @@
  * GNU Lesser General Public License Usage
  * Alternatively, this file may be used under the terms of the GNU Lesser
  * General Public License version 3 as published by the Free
- * Software Foundation and appearing in the file LICENSE.LGPLv3 
+ * Software Foundation and appearing in the file LICENSE.LGPLv3
  * included in the packaging of this file. Please review the
  * following information to ensure the GNU Lesser General Public License
  * requirements will be met: https://www.gnu.org/licenses/lgpl.html and
@@ -25,29 +25,10 @@
  * $QE_END_LICENSE$
  */
 #pragma once
-#include <qe/entity/Global.hpp>
-#include <qe/entity/Types.hpp>
-#include <map>
-#include <mutex>
 
-namespace qe { namespace entity {
+#if defined(QEENTITY_LIBRARY)
+#  define QEENTITY_EXPORT Q_DECL_EXPORT
+#else
+#  define QEENTITY_EXPORT Q_DECL_IMPORT
+#endif
 
-    class QEENTITY_EXPORT ModelRepository
-	{
-		public:
-			static ModelRepository& instance();
-
-			/// @brief It gets the Orm model associated to @p metaObject.
-			ModelShd model( const QMetaObject *metaObject) const;
-
-		private:
-			ModelRepository();
-			ModelRepository( const ModelRepository&) = delete;
-		
-			ModelShd makeModel( const QMetaObject* metaObj) const;
-
-		private:
-			mutable std::recursive_mutex m_modelsMtx;
-			mutable std::map<const QMetaObject*, ModelShd> m_models;
-	};
-}}

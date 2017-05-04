@@ -24,6 +24,7 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <QLoggingCategory>
 #include <qe/entity/Types.hpp>
 #include <qe/annotation/Model.hpp>
@@ -37,7 +38,7 @@ namespace qe { namespace entity
 
 	Q_DECLARE_LOGGING_CATEGORY( lcModel);
 	/// @brief This model parse the Orm annotations
-	class Model : public qe::annotation::Model
+    class QEENTITY_EXPORT Model : public qe::annotation::Model
 	{
 		friend class qe::entity::ModelRepository;
 		public:

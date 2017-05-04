@@ -24,12 +24,13 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
 
 namespace qe { namespace entity { 
 
 	/// @brief Foreign key definition.
-	class RelationDef
+    class QEENTITY_EXPORT RelationDef
 	{
 		public:
 			/// @brief Constructor.

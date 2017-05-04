@@ -25,11 +25,12 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <QVariantList>
 
 namespace qe { namespace entity {
 
-	class AbstractSerializedItem
+    class QEENTITY_EXPORT AbstractSerializedItem
 	{
 		public:
 			AbstractSerializedItem( const QVariantList & pk);

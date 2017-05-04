@@ -1,16 +1,10 @@
 #include <QObject>
-#include <qe/entity/Model.hpp>
-#include <qe/entity/serialization/AbstractSerializedItem.hpp>
+#include <qe/entity/ModelRepository.hpp>
 
 using namespace qe::entity;
 
 int main(int argc, char** argv)
 {
-	QObject * o = new QObject;
-	Model annModel( o->metaObject());
-
-	AbstractSerializedItem si;
-	Q_UNUSED( si);
-	
+	auto mrepo = ModelRepository::instance();
 	return 0;
 }

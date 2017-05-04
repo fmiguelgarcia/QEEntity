@@ -5,12 +5,14 @@ set( QEEntity_MINOR_VERSION 1)
 set( QEEntity_BUILD_VERSION 0)
 
 # Source
-set( QEEntity_SRCS 
+set( QEEntity_SRCS
+	Global.hpp
 	AbstractSerializedItem.cpp AbstractSerializer.cpp
 	Types.cpp EntityDef.cpp RelationDef.cpp
 	Model.cpp ModelRepository.cpp)
 
 # Link
+add_definitions( -DQEENTITY_LIBRARY)
 add_library( QEEntity SHARED ${QEEntity_SRCS})
 target_link_libraries( QEEntity
 	Qt5::Core ${CONAN_LIBS}) 

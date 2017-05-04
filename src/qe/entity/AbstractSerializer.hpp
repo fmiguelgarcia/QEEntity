@@ -25,13 +25,14 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
 #include <qe/entity/AbstractSerializedItem.hpp>
 
 class QObject;
 
 namespace qe { namespace entity { 
-	class AbstractSerializer
+    class QEENTITY_EXPORT AbstractSerializer
 	{
 		public:
 			virtual ~AbstractSerializer();
