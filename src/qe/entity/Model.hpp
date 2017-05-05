@@ -25,12 +25,12 @@
  */
 #pragma once
 #include <qe/entity/Global.hpp>
-#include <QLoggingCategory>
 #include <qe/entity/Types.hpp>
 #include <qe/annotation/Model.hpp>
+#include <QLoggingCategory>
+#include <QMetaObject>
 #include <functional>
 
-class QMetaObject;
 namespace qe { namespace entity
 {
 	class ModelPrivate;
