@@ -33,7 +33,6 @@
 
 namespace qe { namespace entity
 {
-	class ModelPrivate;
 	class ModelRepository;
 
 	Q_DECLARE_LOGGING_CATEGORY( lcModel);
@@ -98,8 +97,5 @@ namespace qe { namespace entity
 			EntityDefList m_primaryKeyDef;		///< Model primary key definition.
 
 			RelationDefList m_referencesManyToOneDefs;	///< Many to one defs.
-
-			ModelPrivate *d_ptr;
-			Q_DECLARE_PRIVATE(Model)
 	};
 }}

@@ -46,7 +46,7 @@ namespace qe { namespace entity {
 
 	// Context
 	using ObjectContext = std::deque<QObject*>;
-    class QEENTITY_EXPORT ScopedStackedObjectContext
+   class QEENTITY_EXPORT ScopedStackedObjectContext
 	{
 		public:
 			ScopedStackedObjectContext( QObject* obj, 
@@ -73,5 +73,4 @@ namespace qe { namespace entity {
 	
         QString QEENTITY_EXPORT primaryKey() noexcept;
 	}
-
 }}

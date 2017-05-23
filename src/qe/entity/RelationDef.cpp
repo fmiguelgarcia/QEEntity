@@ -44,6 +44,9 @@ RelationDef::RelationDef(
 		m_relationKey.push_back( fk);
 	}
 }
+
+RelationDef::~RelationDef()
+{}
 	
 const EntityDefList & RelationDef::relationKey() const noexcept
 { return m_relationKey;}

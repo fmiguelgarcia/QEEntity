@@ -32,7 +32,8 @@
 class QObject;
 
 namespace qe { namespace entity { 
-    class QEENTITY_EXPORT AbstractSerializer
+	class AbstractSerializerPrivate;	
+	class QEENTITY_EXPORT AbstractSerializer
 	{
 		public:
 			virtual ~AbstractSerializer();
@@ -53,7 +54,11 @@ namespace qe { namespace entity {
 					const AbstractSerializedItem *const source,
 					QObject *const target) const = 0;
 
+			AbstractSerializerPrivate * d_ptr;
+
 		private:
 			ModelShd checkAndGetModel( const QMetaObject* metaObject) const;
+
+			Q_DECLARE_PRIVATE( AbstractSerializer);
 	};
 }}

@@ -120,6 +120,9 @@ namespace qe { namespace entity {
 			inline QMetaEnum* enumerator() const noexcept
 			{ return m_metaEnum.get();}
 
+		protected:
+			EntityDefPrivate *d_ptr;
+
 		private:
 			EntityDef( const EntityDef& );
 
@@ -143,5 +146,7 @@ namespace qe { namespace entity {
 			uint m_entityMaxLength 	= 0;
 			bool m_isAutoIncrement 	= false;
 			bool m_isNullable	 		= true;
+
+			Q_DECLARE_PRIVATE( EntityDef);
 	};
 }}

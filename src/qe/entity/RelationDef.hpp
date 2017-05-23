@@ -28,9 +28,10 @@
 #include <qe/entity/Types.hpp>
 
 namespace qe { namespace entity { 
+	class RelationDefPrivate;
 
 	/// @brief Foreign key definition.
-    class QEENTITY_EXPORT RelationDef
+	class QEENTITY_EXPORT RelationDef
 	{
 		public:
 			/// @brief Constructor.
@@ -39,6 +40,7 @@ namespace qe { namespace entity {
 			RelationDef(
 					const QByteArray& propertyName,
 					const ModelShd& reference);
+			~RelationDef();
 
 			/// @return It returns the property name.
 			const QByteArray& propertyName() const noexcept;
@@ -49,9 +51,14 @@ namespace qe { namespace entity {
 			/// @return It return the reference model.
 			ModelShd reference() const noexcept;
 
+		protected:
+			RelationDefPrivate* d_ptr;
+
 		private:
 			const QByteArray m_propertyName;
 			ModelShd m_reference;
 			EntityDefList m_relationKey;
+
+			Q_DECLARE_PRIVATE( RelationDef);
 	};
 }}

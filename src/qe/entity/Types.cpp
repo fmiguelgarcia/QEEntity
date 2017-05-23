@@ -71,21 +71,4 @@ namespace qe { namespace entity {
 		QString modelName() noexcept
 		{ return QStringLiteral( "@qe.model.name");}
 
-#if 0
-
-
-	QString defaultValue() noexcept
-	{ return QStringLiteral( "@qe.orm.default");}
-
-	QString classId() noexcept
-	{ return QStringLiteral( "class");}
-
-
-	QString isTemporaryTable() noexcept
-	{ return QStringLiteral( "@qe.orm.isTemporaryTable");}
-
-	QString index() noexcept
-	{ return QStringLiteral( "@qe.orm.index");}
-
-#endif
 }}}

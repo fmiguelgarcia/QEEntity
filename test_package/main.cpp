@@ -5,6 +5,6 @@ using namespace qe::entity;
 
 int main(int argc, char** argv)
 {
-	auto mrepo = ModelRepository::instance();
+	const auto& mrepo = ModelRepository::instance();
 	return 0;
 }

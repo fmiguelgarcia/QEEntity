@@ -29,18 +29,23 @@
 #include <QVariantList>
 
 namespace qe { namespace entity {
+	class AbstractSerializedItemPrivate;
 
-    class QEENTITY_EXPORT AbstractSerializedItem
+	class QEENTITY_EXPORT AbstractSerializedItem
 	{
 		public:
-			AbstractSerializedItem( const QVariantList & pk);
-			AbstractSerializedItem( QVariantList && pk = QVariantList{});
+			explicit AbstractSerializedItem( const QVariantList & pk);
+			explicit AbstractSerializedItem( QVariantList && pk = QVariantList{});
 
 			virtual ~AbstractSerializedItem();
 
 			const QVariantList& primaryKey() const noexcept;
 
+		protected:
+			AbstractSerializedItemPrivate* d_ptr;
+
 		private:
-			QVariantList m_primaryKeyValues;			
+			QVariantList m_primaryKeyValues;
+			Q_DECLARE_PRIVATE(AbstractSerializedItem);
 	};
 }}

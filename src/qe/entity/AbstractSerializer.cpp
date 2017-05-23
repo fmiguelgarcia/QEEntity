@@ -50,7 +50,8 @@ const QMetaObject* checkAndGetMetaObject( QObject* const obj)
 // Class AbstractSerializer
 // ============================================================================
 
-AbstractSerializer::~AbstractSerializer() = default;
+AbstractSerializer::~AbstractSerializer()
+{}	
 		
 void AbstractSerializer::save( QObject* const source, 
 	AbstractSerializedItem* const target) const

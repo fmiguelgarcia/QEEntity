@@ -27,16 +27,20 @@
 #include "AbstractSerializedItem.hpp"
 using namespace qe::entity;
 
+/// @brief It creates an @c AbstractSerializedItem with @p pk values as
+///	primary key or unique identifier.
 AbstractSerializedItem::AbstractSerializedItem( const QVariantList & pk)
 	: m_primaryKeyValues( pk)
 {}
 
+/// @see AbstractSerializedItem( const QVariantList & )
 AbstractSerializedItem::AbstractSerializedItem( QVariantList && pk)
 	: m_primaryKeyValues( std::move(pk))
 {}
 
-AbstractSerializedItem::~AbstractSerializedItem() = default;
-
+/// @internal d_ptr is not released becauses is not used yet.
+AbstractSerializedItem::~AbstractSerializedItem()
+{}	
 
 const QVariantList& AbstractSerializedItem::primaryKey() const noexcept
 { return m_primaryKeyValues; }
