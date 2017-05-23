@@ -47,13 +47,17 @@ namespace qe { namespace entity {
 		Q_GADGET
 		public:
 			enum MappingType { 
-				NoMappingType, 
+				NoMappingType = 0, 
 				OneToOne, OneToMany, 
 				ManyToOne, ManyToMany };
+#if (QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
 			Q_ENUM( MappingType );
+#endif
 
 			enum MappingFetch { Direct, Lazy };
+#if (QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
 			Q_ENUM( MappingFetch );
+#endif
 
 			/// @brief It creates an entity definition 
 			/// @param property Property name.

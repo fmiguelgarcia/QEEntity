@@ -38,6 +38,24 @@ using namespace qe::annotation;
 using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcEntityDef, "com.dmious.qe.entity.EntityDef")
 
+namespace {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
+       EntityDef::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
+       {
+               static vector<QString> strValues = { "NoMappingType", "OneToOne", "OneToMany", "ManyToOne", "ManyToMany" };
+               EntityDef::MappingType mt = EntityDef::MappingType::NoMappingType;
+               auto itr = find( begin(strValues), end(strValues), mappingTypeStr);
+               if( enumOk )
+                       *enumOk = (itr != end(strValues));
+
+               if( itr != end(strValues))
+                       mt = static_cast<EntityDef::MappingType>( distance( begin(strValues), itr));
+
+               return mt;
+       }
+#endif
+}
+
 EntityDef::EntityDef( const QByteArray &propertyName, const int propertyType,
 				const QString& entityName, const uint entityMaxLength)
 	: m_propertyName( propertyName), m_propertyType( propertyType),
@@ -94,11 +112,15 @@ EntityDef::MappingType decodeMappingType( const qe::annotation::Model & model, c
 		qe::entity::tags::mappingType()).value( QStringLiteral("NoMappingType"))
 			.toString();
 
+#if ( QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
 	EntityDef::MappingType mappingType = static_cast<EntityDef::MappingType>( 
 		QMetaEnum::fromType< EntityDef::MappingType>()
 			.keyToValue( 
 				mappingTypeStr.toLocal8Bit().constData(), 
 				&enumOk)); 
+#else
+	EntityDef::MappingType mappingType = toMappingType( mappingTypeStr, &enumOk);
+#endif
 
 	if( !enumOk)
 		common::Exception::makeAndThrow(

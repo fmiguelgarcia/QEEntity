@@ -27,6 +27,7 @@
 #pragma once
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
+#include <QMetaObject>
 #include <map>
 #include <mutex>
 
