@@ -46,16 +46,6 @@ namespace qe { namespace entity {
 
 	// Context
 	using ObjectContext = std::deque<QObject*>;
-   class QEENTITY_EXPORT ScopedStackedObjectContext
-	{
-		public:
-			ScopedStackedObjectContext( QObject* obj, 
-					ObjectContext &context);
-			~ScopedStackedObjectContext();
-
-		private:
-			ObjectContext &m_context;
-	};
 
 	// Tags
 	namespace tags {

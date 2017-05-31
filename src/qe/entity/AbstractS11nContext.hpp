@@ -24,23 +24,45 @@
  *
  * $QE_END_LICENSE$
  */
-#include "AbstractSerializedItem.hpp"
-using namespace qe::entity;
+#pragma once
+#include <qe/entity/Global.hpp>
+#include <qe/entity/Types.hpp>
+#include <QVariantList>
 
-/// @brief It creates an @c AbstractSerializedItem with @p pk values as
-///	primary key or unique identifier.
-AbstractSerializedItem::AbstractSerializedItem( const QVariantList & pk)
-	: m_primaryKeyValues( pk)
-{}
+namespace qe { namespace entity {
+	class AbstractS11nContextPrivate;
 
-/// @see AbstractSerializedItem( const QVariantList & )
-AbstractSerializedItem::AbstractSerializedItem( QVariantList && pk)
-	: m_primaryKeyValues( std::move(pk))
-{}
 
-/// @internal d_ptr is not released becauses is not used yet.
-AbstractSerializedItem::~AbstractSerializedItem()
-{}	
+	class QEENTITY_EXPORT AbstractS11nContext
+	{
+		friend class ScopedS11Context;
+		public:
+			explicit AbstractS11nContext( const QVariantList & pk);
+			virtual ~AbstractS11nContext();
 
-const QVariantList& AbstractSerializedItem::primaryKey() const noexcept
-{ return m_primaryKeyValues; }
+			const QVariantList& primaryKey() const noexcept;
+
+		protected:
+			AbstractS11nContextPrivate* d_ptr;
+			ObjectContext m_context;
+
+		private:
+			const QVariantList m_primaryKeyValues;
+
+			Q_DECLARE_PRIVATE(AbstractS11nContext);
+	};
+	
+	class QEENTITY_EXPORT ScopedS11Context
+	{
+		public:
+			ScopedS11Context( 
+				QObject* obj, 
+				AbstractS11nContext *context);
+			~ScopedS11Context();
+
+		private:
+			AbstractS11nContext *m_s11nContext;
+	};
+
+
+}}

@@ -27,7 +27,7 @@
 #pragma once
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
-#include <qe/entity/AbstractSerializedItem.hpp>
+#include <qe/entity/AbstractS11nContext.hpp>
 
 class QObject;
 
@@ -38,20 +38,23 @@ namespace qe { namespace entity {
 		public:
 			virtual ~AbstractSerializer();
 
-			virtual void save( QObject* const source, 
-					AbstractSerializedItem* const target) const;
+			virtual void save( 
+					QObject* const source, 
+					AbstractS11nContext* const context) const;
 
-			virtual void load( const AbstractSerializedItem* const source, 
+			virtual void load( 
+					const AbstractS11nContext* const context, 
 					QObject *const target) const;
 
 		protected:
-			virtual void save( ObjectContext& context, 
-					const ModelShd& model, QObject *const source, 
-					AbstractSerializedItem *const target) const = 0;
-
-			virtual void load( ObjectContext& context, 
+			virtual void save( 
 					const ModelShd& model, 
-					const AbstractSerializedItem *const source,
+					QObject *const source, 
+					AbstractS11nContext* const context) const = 0;
+
+			virtual void load( 
+					const ModelShd& model, 
+					const AbstractS11nContext*const source,
 					QObject *const target) const = 0;
 
 			AbstractSerializerPrivate * d_ptr;

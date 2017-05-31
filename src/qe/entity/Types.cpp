@@ -27,18 +27,7 @@
 
 namespace qe { namespace entity { 
 
-	ScopedStackedObjectContext::ScopedStackedObjectContext( QObject* obj, 
-		ObjectContext &context)
-		: m_context( context)
-	{
-		m_context.push_back( obj);
-	}
 
-	ScopedStackedObjectContext::~ScopedStackedObjectContext()
-	{
-		m_context.pop_back();
-	}
-	
 	namespace tags {
 
 		QString entityName() noexcept

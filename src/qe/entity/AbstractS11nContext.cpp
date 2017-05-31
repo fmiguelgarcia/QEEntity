@@ -24,28 +24,33 @@
  *
  * $QE_END_LICENSE$
  */
-#pragma once
-#include <qe/entity/Global.hpp>
-#include <QVariantList>
+#include "AbstractS11nContext.hpp"
+using namespace qe::entity;
 
-namespace qe { namespace entity {
-	class AbstractSerializedItemPrivate;
+/// @brief It creates an @c AbstractS11nContext with @p pk values as
+///	primary key or unique identifier.
+AbstractS11nContext::AbstractS11nContext( const QVariantList & pk)
+	: m_primaryKeyValues( pk)
+{}
 
-	class QEENTITY_EXPORT AbstractSerializedItem
-	{
-		public:
-			explicit AbstractSerializedItem( const QVariantList & pk);
-			explicit AbstractSerializedItem( QVariantList && pk = QVariantList{});
+/// @internal d_ptr is not released becauses is not used yet.
+AbstractS11nContext::~AbstractS11nContext()
+{}	
 
-			virtual ~AbstractSerializedItem();
+const QVariantList& AbstractS11nContext::primaryKey() const noexcept
+{ return m_primaryKeyValues; }
 
-			const QVariantList& primaryKey() const noexcept;
 
-		protected:
-			AbstractSerializedItemPrivate* d_ptr;
+ScopedS11Context::ScopedS11Context( 
+	QObject* obj, 
+	AbstractS11nContext *context)
+: m_s11nContext( context)
+{
+	m_s11nContext->m_context.push_back( obj);
+}
 
-		private:
-			QVariantList m_primaryKeyValues;
-			Q_DECLARE_PRIVATE(AbstractSerializedItem);
-	};
-}}
+ScopedS11Context::~ScopedS11Context()
+{
+	m_s11nContext->m_context.pop_back();
+}
+	

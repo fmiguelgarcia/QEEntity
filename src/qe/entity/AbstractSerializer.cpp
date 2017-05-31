@@ -53,24 +53,24 @@ const QMetaObject* checkAndGetMetaObject( QObject* const obj)
 AbstractSerializer::~AbstractSerializer()
 {}	
 		
-void AbstractSerializer::save( QObject* const source, 
-	AbstractSerializedItem* const target) const
+void AbstractSerializer::save( 
+	QObject* const source, 
+	AbstractS11nContext* const context) const
 {
 	const QMetaObject* metaObject = checkAndGetMetaObject( source);
 	ModelShd lmodel = checkAndGetModel( metaObject);
 
-	ObjectContext context;
-	save( context, lmodel, source, target);
+	save( lmodel, source, context);
 }
 
-void AbstractSerializer::load( const AbstractSerializedItem* const source, 
+void AbstractSerializer::load( 
+	const AbstractS11nContext* const context, 
 	QObject *const target) const
 {
 	const QMetaObject* metaObject = checkAndGetMetaObject( target);
 	ModelShd lmodel = checkAndGetModel( metaObject);
 
-	ObjectContext context;
-	load( context, lmodel, source, target);
+	load( lmodel, context, target);
 }
 
 ModelShd AbstractSerializer::checkAndGetModel( const QMetaObject* metaObject) const
