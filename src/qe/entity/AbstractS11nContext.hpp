@@ -32,7 +32,9 @@
 namespace qe { namespace entity {
 	class AbstractS11nContextPrivate;
 
-
+	/// \internal It is not thread-safe due to \c m_context.
+	/// Anyway it should be use inside a thread and NOT share this object
+	/// between several ones.
 	class QEENTITY_EXPORT AbstractS11nContext
 	{
 		friend class ScopedS11Context;
@@ -44,24 +46,24 @@ namespace qe { namespace entity {
 
 		protected:
 			AbstractS11nContextPrivate* d_ptr;
-			ObjectContext m_context;
+			mutable ObjectContext m_context;
 
 		private:
 			const QVariantList m_primaryKeyValues;
 
 			Q_DECLARE_PRIVATE(AbstractS11nContext);
 	};
-	
+
 	class QEENTITY_EXPORT ScopedS11Context
 	{
 		public:
 			ScopedS11Context( 
 				QObject* obj, 
-				AbstractS11nContext *context);
+				const AbstractS11nContext * const context);
 			~ScopedS11Context();
 
 		private:
-			AbstractS11nContext *m_s11nContext;
+			const AbstractS11nContext * const m_s11nContext;
 	};
 
 

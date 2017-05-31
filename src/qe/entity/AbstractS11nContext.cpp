@@ -27,23 +27,35 @@
 #include "AbstractS11nContext.hpp"
 using namespace qe::entity;
 
+/** \class AbstractS11nContext 
+ * \since 1.0.0
+ * \brief It is the base class for all serialization context.
+ */
+
 /// @brief It creates an @c AbstractS11nContext with @p pk values as
 ///	primary key or unique identifier.
 AbstractS11nContext::AbstractS11nContext( const QVariantList & pk)
 	: m_primaryKeyValues( pk)
 {}
 
-/// @internal d_ptr is not released becauses is not used yet.
+/// @internal d_ptr is not released because is not used yet.
 AbstractS11nContext::~AbstractS11nContext()
 {}	
 
 const QVariantList& AbstractS11nContext::primaryKey() const noexcept
 { return m_primaryKeyValues; }
 
+/** \class ScopedS11Context
+ * \since 1.0.0
+ * \brief It is a helper class to associate object context to an scope.
+ *
+ * It inserts the object \c obj on top of \c context context in its constructor.
+ * And it will removed when this object is destroyed.
+ */
 
 ScopedS11Context::ScopedS11Context( 
 	QObject* obj, 
-	AbstractS11nContext *context)
+	const AbstractS11nContext * const context)
 : m_s11nContext( context)
 {
 	m_s11nContext->m_context.push_back( obj);
