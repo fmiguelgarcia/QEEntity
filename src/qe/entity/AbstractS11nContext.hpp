@@ -43,6 +43,7 @@ namespace qe { namespace entity {
 			virtual ~AbstractS11nContext();
 
 			const QVariantList& primaryKey() const noexcept;
+			bool isObjectInContext( const QObject* other) const noexcept;
 
 		protected:
 			AbstractS11nContextPrivate* d_ptr;

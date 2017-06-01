@@ -42,8 +42,16 @@ AbstractS11nContext::AbstractS11nContext( const QVariantList & pk)
 AbstractS11nContext::~AbstractS11nContext()
 {}	
 
+/// \brief It returns the primary key values.
 const QVariantList& AbstractS11nContext::primaryKey() const noexcept
 { return m_primaryKeyValues; }
+		
+/// \brief It checks if @p other is already inside the current context.
+bool AbstractS11nContext::isObjectInContext( const QObject* other) const noexcept
+{
+	const auto itr = find( begin( m_context), end( m_context), other);
+	return itr != end( m_context);
+}
 
 /** \class ScopedS11Context
  * \since 1.0.0
