@@ -33,24 +33,29 @@ using namespace qe::entity;
 using namespace qe::common;
 using namespace std;
 
-/// \brief It checks that @p obj is NOT null and returns its valid metaobject.
-/// It throws an exception if any check fails.
-const QMetaObject* checkAndGetMetaObject( QObject* const obj)
-{
-	if( !obj)
-		Exception::makeAndThrow( 
-			QStringLiteral( "Serializer requires not-null target")); 
+namespace {
+	/// \brief It checks that @p obj is NOT null and returns its valid metaobject.
+	/// It throws an exception if any check fails.
+	const QMetaObject* checkAndGetMetaObject( QObject* const obj)
+	{
+		if( !obj)
+			Exception::makeAndThrow( 
+					QStringLiteral( "Serializer requires not-null target")); 
 
-	const QMetaObject *metaObject = obj->metaObject();
-	if( !metaObject)
-		Exception::makeAndThrow( 
-			QStringLiteral( "Serializer cannot find meta object")); 
+		const QMetaObject *metaObject = obj->metaObject();
+		if( !metaObject)
+			Exception::makeAndThrow( 
+					QStringLiteral( "Serializer cannot find meta object")); 
 
-	return metaObject;
+		return metaObject;
+	}
 }
 
 // Class AbstractSerializer
 // ============================================================================
+
+AbstractSerializer::AbstractSerializer()
+{}
 
 AbstractSerializer::~AbstractSerializer()
 {}	

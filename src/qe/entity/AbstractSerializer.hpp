@@ -28,14 +28,15 @@
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
 #include <qe/entity/AbstractS11nContext.hpp>
-
-class QObject;
+#include <QObject>
 
 namespace qe { namespace entity { 
 	class AbstractSerializerPrivate;	
+
 	class QEENTITY_EXPORT AbstractSerializer
 	{
 		public:
+			AbstractSerializer();
 			virtual ~AbstractSerializer();
 
 			virtual void save( 
