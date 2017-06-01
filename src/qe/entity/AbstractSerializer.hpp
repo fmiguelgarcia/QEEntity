@@ -40,11 +40,11 @@ namespace qe { namespace entity {
 
 			virtual void save( 
 					QObject* const source, 
-					AbstractS11nContext* const context) const;
+					AbstractS11nContext* const context = nullptr) const;
 
 			virtual void load( 
-					const AbstractS11nContext* const context, 
-					QObject *const target) const;
+					QObject *const target,
+					const AbstractS11nContext* const context = nullptr) const;
 
 		protected:
 			virtual void save( 
@@ -54,8 +54,8 @@ namespace qe { namespace entity {
 
 			virtual void load( 
 					const ModelShd& model, 
-					const AbstractS11nContext*const source,
-					QObject *const target) const = 0;
+					QObject *const target,
+					const AbstractS11nContext*const context) const = 0;
 
 			AbstractSerializerPrivate * d_ptr;
 

@@ -33,6 +33,8 @@ using namespace qe::entity;
 using namespace qe::common;
 using namespace std;
 
+/// \brief It checks that @p obj is NOT null and returns its valid metaobject.
+/// It throws an exception if any check fails.
 const QMetaObject* checkAndGetMetaObject( QObject* const obj)
 {
 	if( !obj)
@@ -64,13 +66,13 @@ void AbstractSerializer::save(
 }
 
 void AbstractSerializer::load( 
-	const AbstractS11nContext* const context, 
-	QObject *const target) const
+	QObject *const target,
+	const AbstractS11nContext* const context) const
 {
 	const QMetaObject* metaObject = checkAndGetMetaObject( target);
 	ModelShd lmodel = checkAndGetModel( metaObject);
 
-	load( lmodel, context, target);
+	load( lmodel, target, context);
 }
 
 ModelShd AbstractSerializer::checkAndGetModel( const QMetaObject* metaObject) const
