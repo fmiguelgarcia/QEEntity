@@ -78,6 +78,7 @@ namespace qe { namespace entity {
 
 			EntityDef& operator=( const EntityDef& other) noexcept;
 			EntityDef& operator=( EntityDef&& other) noexcept;
+			bool operator==( const EntityDef& other) const noexcept;
 
 			const QString& entityName() const noexcept;
 			void setEntityName( const QString& name) noexcept;

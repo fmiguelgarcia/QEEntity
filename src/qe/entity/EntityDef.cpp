@@ -96,6 +96,10 @@ EntityDef& EntityDef::operator=( EntityDef&& other) noexcept
 	return *this;
 }
 
+bool EntityDef::operator==( const EntityDef& other) const noexcept
+{
+	return d_ptr == other.d_ptr;
+}
 
 void EntityDef::detach()
 {
