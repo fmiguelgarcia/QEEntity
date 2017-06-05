@@ -24,6 +24,7 @@ class QEEntityTest
 		void checkEntityIsAutoIncrementable();
 		void checkEntityIsNullable();
 		void checkEntityName();
+		void checkEntityOneToManyAutoDetect();
 		
 	private:
 		std::unique_ptr<Book> m_book;

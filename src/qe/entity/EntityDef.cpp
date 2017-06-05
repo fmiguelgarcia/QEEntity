@@ -30,6 +30,7 @@
 #include <qe/entity/Model.hpp>
 #include <QMetaEnum>
 #include <QStringBuilder>
+#include <QMetaProperty>
 #include <utility>
 
 using namespace qe;
@@ -54,6 +55,20 @@ namespace {
                return mt;
        }
 #endif
+
+	/// \brief It checks if property @p propertyName requires a OneToMany
+	/// mapping.
+	/// \internal Right now, only \c StringList type return true.
+	bool typeRequiresOneToManyMapping(
+		const QMetaObject* mo,
+		const QByteArray &propertyName )
+	{
+		const int propIndex = mo->indexOfProperty( propertyName.constData());
+		const QMetaProperty metaProp = mo->property( propIndex);
+		const QVariant::Type propType = metaProp.type();
+
+		return propType == QVariant::Type::StringList;
+	}
 }
 
 EntityDef::EntityDef( const QByteArray &propertyName, const int propertyType,
@@ -108,8 +123,13 @@ void EntityDef::decodeProperties(const qe::annotation::Model &model)
 EntityDef::MappingType decodeMappingType( const qe::annotation::Model & model, const QString& propName)
 {
 	bool enumOk;
-	const QString mappingTypeStr = model.annotation( propName, 
-		qe::entity::tags::mappingType()).value( QStringLiteral("NoMappingType"))
+	QString mappingTypeStr;
+
+	if( typeRequiresOneToManyMapping( model.metaObject(), propName.toUtf8()))
+		mappingTypeStr = QStringLiteral( "OneToMany");
+	else
+		mappingTypeStr = model.annotation( propName,
+				qe::entity::tags::mappingType()).value( QStringLiteral("NoMappingType"))
 			.toString();
 
 #if ( QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
@@ -134,7 +154,7 @@ EntityDef::MappingType decodeMappingType( const qe::annotation::Model & model, c
 void EntityDef::decodeMapping(const qe::annotation::Model &model)
 {
 	const QString propName = propertyName();
-	const QString mappingEntityName = model.annotation( propName, 
+	QString mappingEntityName = model.annotation( propName,
 				  tags::mappingEntity()).value().toString();
 	m_mappingType = decodeMappingType( model, propName);
 	
@@ -144,18 +164,22 @@ void EntityDef::decodeMapping(const qe::annotation::Model &model)
 	
 	if( m_mappingType != MappingType::NoMappingType)
 	{
-		if( mappingEntityName.isEmpty())
-			common::Exception::makeAndThrow(
-				QStringLiteral("QE Entity requires no empty mapping entity on property '%1'")
-					.arg( propName));
-		
-		// Check metadata is available.
-		const QString classPointer = mappingEntityName + QChar('*');
-		const int typeId = QMetaType::type( classPointer.toLocal8Bit());
+		int typeId;
+		if( ! mappingEntityName.isEmpty())
+		{
+			const QString classPointer = mappingEntityName + QChar('*');
+			typeId = QMetaType::type( classPointer.toLocal8Bit());
+		}
+		else
+		{
+			mappingEntityName = m_entityName % "_" % propName;
+			typeId = QVariant::Type::String;
+		}
+
 		if( typeId == QMetaType::UnknownType)
 			common::Exception::makeAndThrow(
-				QStringLiteral("QE Entity cannot map entity of type '") 
-				% mappingEntityName 
+				QStringLiteral("QE Entity cannot map entity of type '")
+				% mappingEntityName
 				% QStringLiteral( "'. Please use 'Q_DECLARE_METATYPE' and 'qRegisterMetaType' to add entity to meta-object system."));
 		
 		m_mappingEntity = QMetaType::metaObjectForType( typeId);

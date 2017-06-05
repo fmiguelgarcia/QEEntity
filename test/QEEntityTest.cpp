@@ -128,5 +128,12 @@ void QEEntityTest::checkEntityName()
 	QVERIFY( entityDef && entityDef->entityName() == "title");
 }
 
+void QEEntityTest::checkEntityOneToManyAutoDetect()
+{
+	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName {"footNotes"});
+	QVERIFY( entityDef && entityDef->entityName() == "footNotes");
+	QVERIFY( entityDef->mappingType() == EntityDef::MappingType::OneToMany);
+}
+
 
 QTEST_MAIN( QEEntityTest)
