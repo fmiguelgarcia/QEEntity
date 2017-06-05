@@ -26,8 +26,7 @@
  */
 
 #include "EntityDef.hpp"
-#include <qe/common/Exception.hpp>
-#include <qe/entity/Model.hpp>
+#include "EntityDefPrivate.hpp"
 #include <QMetaEnum>
 #include <QStringBuilder>
 #include <QMetaProperty>
@@ -35,154 +34,171 @@
 
 using namespace qe;
 using namespace qe::entity;
-using namespace qe::annotation;
+using namespace qe::common;
 using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcEntityDef, "com.dmious.qe.entity.EntityDef")
 
-namespace {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
-       EntityDef::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
-       {
-               static vector<QString> strValues = { "NoMappingType", "OneToOne", "OneToMany", "ManyToOne", "ManyToMany" };
-               EntityDef::MappingType mt = EntityDef::MappingType::NoMappingType;
-               auto itr = find( begin(strValues), end(strValues), mappingTypeStr);
-               if( enumOk )
-                       *enumOk = (itr != end(strValues));
 
-               if( itr != end(strValues))
-                       mt = static_cast<EntityDef::MappingType>( distance( begin(strValues), itr));
-
-               return mt;
-       }
-#endif
-
-	/// \brief It checks if property @p propertyName requires a OneToMany
-	/// mapping.
-	/// \internal Right now, only \c StringList type return true.
-	bool typeRequiresOneToManyMapping(
-		const QMetaObject* mo,
-		const QByteArray &propertyName )
-	{
-		const int propIndex = mo->indexOfProperty( propertyName.constData());
-		const QMetaProperty metaProp = mo->property( propIndex);
-		const QVariant::Type propType = metaProp.type();
-
-		return propType == QVariant::Type::StringList;
-	}
-}
-
+/**
+ * @brief It creates an entity definition
+ * @param property Property name.
+ * @param type Property type.
+ * @param model It will use this model to extract annotations.
+ */
+/*
 EntityDef::EntityDef( const QByteArray &propertyName, const int propertyType,
 				const QString& entityName, const uint entityMaxLength)
-	: m_propertyName( propertyName), m_propertyType( propertyType),
-	m_entityName( entityName), m_entityMaxLength( entityMaxLength)
+	: d_ptr( new EntityDefPrivate(
+		propertyName,
+		propertyType,
+		entityName,
+		entityMaxLength
+{}
+*/
+
+EntityDef::EntityDef(
+	const QByteArray &property,
+	const int type,
+	const uint maxLength,
+	const qe::entity::Model *model)
+	: d_ptr(
+		new EntityDefPrivate( property, type, maxLength, model))
 {}
 
-EntityDef::EntityDef( const QByteArray &property, const int type,
-	  	const qe::annotation::Model &model)
-	: m_propertyName(property), m_propertyType( type)
-{
-	decodeProperties( model);
-	
-	try {
-		decodeMapping( model);
-	} catch ( const common::Exception & error ){
-		qCWarning( lcEntityDef) << error.what();
-		m_mappingType = MappingType::NoMappingType;
-	}
+/// @brief It is a constructor for Enum types.
+EntityDef::EntityDef(
+	const QByteArray &property,
+	const QMetaEnum& me,
+	const qe::entity::Model *model)
+	: d_ptr( new EntityDefPrivate( property, me, model))
+{}
 
-	if( type == QMetaType::Char 
-		|| type == QMetaType::QChar
-		|| type == QMetaType::SChar
-		|| type == QMetaType::UChar)
-		m_entityMaxLength = 1;
+EntityDef::EntityDef( EntityDef&& other) noexcept
+	: d_ptr( std::move( other.d_ptr))
+{}
+
+EntityDef::EntityDef( const EntityDef& other) noexcept
+	: d_ptr( other.d_ptr)
+{}
+
+EntityDef::~EntityDef()
+{}
+
+EntityDef& EntityDef::operator=( const EntityDef& other) noexcept
+{
+	d_ptr = other.d_ptr;
+	return *this;
 }
 
-EntityDef::EntityDef( const QByteArray &property, const QMetaEnum& me, 
-	const qe::annotation::Model &model)
-	: EntityDef( property, QMetaType::Int, model) 
+EntityDef& EntityDef::operator=( EntityDef&& other) noexcept
 {
-	m_metaEnum.reset( new QMetaEnum(me));
+	d_ptr = std::move(other.d_ptr);
+	return *this;
 }
 
-void EntityDef::decodeProperties(const qe::annotation::Model &model)
+
+void EntityDef::detach()
 {
-	const QString propName = propertyName();
-	m_entityName = model.annotation( propName, 
-		qe::entity::tags::entityName()).value( propName).toString();
-
-	m_isNullable = model.annotation( propName, 
-			tags::isNullable()).value( true).toBool();
-
-	m_isAutoIncrement = model.annotation( propName, 
-			tags::isAutoIncrementable()).value( false).toBool();
-
-	m_entityMaxLength = model.annotation( propName, 
-			tags::entityMaxLength()).value( 0).toUInt();
+	d_ptr.detach();
 }
 
-EntityDef::MappingType decodeMappingType( const qe::annotation::Model & model, const QString& propName)
+const QString& EntityDef::entityName() const noexcept
 {
-	bool enumOk;
-	QString mappingTypeStr;
-
-	if( typeRequiresOneToManyMapping( model.metaObject(), propName.toUtf8()))
-		mappingTypeStr = QStringLiteral( "OneToMany");
-	else
-		mappingTypeStr = model.annotation( propName,
-				qe::entity::tags::mappingType()).value( QStringLiteral("NoMappingType"))
-			.toString();
-
-#if ( QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
-	EntityDef::MappingType mappingType = static_cast<EntityDef::MappingType>( 
-		QMetaEnum::fromType< EntityDef::MappingType>()
-			.keyToValue( 
-				mappingTypeStr.toLocal8Bit().constData(), 
-				&enumOk)); 
-#else
-	EntityDef::MappingType mappingType = toMappingType( mappingTypeStr, &enumOk);
-#endif
-
-	if( !enumOk)
-		common::Exception::makeAndThrow(
-			QStringLiteral( "QE Entity cannot decode mapping type '%1' on property '%2'")
-				.arg( mappingTypeStr)
-				.arg( propName));
-
-	return mappingType;
+	const Q_D(EntityDef);
+	return d->entityName;
 }
 
-void EntityDef::decodeMapping(const qe::annotation::Model &model)
+void EntityDef::setEntityName( const QString& name) noexcept
 {
-	const QString propName = propertyName();
-	QString mappingEntityName = model.annotation( propName,
-				  tags::mappingEntity()).value().toString();
-	m_mappingType = decodeMappingType( model, propName);
-	
-	// By default use OneToMany mapping type when mapping Entity is used.
-	if( ! mappingEntityName.isEmpty() && m_mappingType == MappingType::NoMappingType)
-		m_mappingType = MappingType::OneToMany;
-	
-	if( m_mappingType != MappingType::NoMappingType)
-	{
-		int typeId;
-		if( ! mappingEntityName.isEmpty())
-		{
-			const QString classPointer = mappingEntityName + QChar('*');
-			typeId = QMetaType::type( classPointer.toLocal8Bit());
-		}
-		else
-		{
-			mappingEntityName = m_entityName % "_" % propName;
-			typeId = QVariant::Type::String;
-		}
-
-		if( typeId == QMetaType::UnknownType)
-			common::Exception::makeAndThrow(
-				QStringLiteral("QE Entity cannot map entity of type '")
-				% mappingEntityName
-				% QStringLiteral( "'. Please use 'Q_DECLARE_METATYPE' and 'qRegisterMetaType' to add entity to meta-object system."));
-		
-		m_mappingEntity = QMetaType::metaObjectForType( typeId);
-	}
+	Q_D(EntityDef);
+	d->entityName = name;
 }
 
+const QByteArray& EntityDef::propertyName() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->propertyName;
+}
+
+const int EntityDef::propertyType() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->propertyType;
+}
+
+const QVariant& EntityDef::defaultValue() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->defaultValue;
+}
+
+const EntityDef::MappedType EntityDef::mappedType() const noexcept
+{
+	const Q_D(EntityDef);
+	return static_cast<EntityDef::MappedType>( d->mappedType);
+}
+
+void EntityDef::setMappedType( const MappedType mt) noexcept
+{
+	Q_D(EntityDef);
+	d->mappedType = mt;
+}
+
+const EntityDef::MappedFetch EntityDef::mappedFetch() const noexcept
+{
+	const Q_D(EntityDef);
+	return static_cast<EntityDef::MappedFetch>( d->mappedFetch);
+}
+
+shared_ptr<qe::entity::Model> EntityDef::mappedModel() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->mappedModel;
+}
+
+uint EntityDef::maxLength() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->maxLength;
+}
+
+bool EntityDef::isAutoIncrement() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->isAutoIncrement;
+}
+
+void EntityDef::setAutoIncrement( const bool value)
+{
+	Q_D(EntityDef);
+	d->isAutoIncrement = value;
+}
+
+bool EntityDef::isNullable() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->isNullable;
+}
+
+void EntityDef::setNullable(const bool value)
+{
+	Q_D(EntityDef);
+	d->isNullable = value;
+}
+
+
+/// @brief It checks if this entity definition is an Enum.
+bool EntityDef::isEnum() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->isNullable;
+}
+
+/// @return It returns the meta-enum information if it is an Enum
+/// entity or null in other case.
+/// @see EntityDef#isEnum()
+optional<QMetaEnum> EntityDef::enumerator() const noexcept
+{
+	const Q_D(EntityDef);
+	return d->metaEnum;
+}

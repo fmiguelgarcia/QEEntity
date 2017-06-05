@@ -38,8 +38,8 @@ namespace qe { namespace entity {
 	class RelationDef;
 	class Model;
 
-	using EntityDefShd = std::shared_ptr<EntityDef>;
-	using EntityDefList = std::vector<EntityDefShd>;
+	// using EntityDefShd = std::shared_ptr<EntityDef>;
+	using EntityDefList = std::vector<EntityDef>;
 	using RelationDefShd = std::shared_ptr<RelationDef>;
 	using RelationDefList= std::vector<RelationDefShd>;
 	using ModelShd = std::shared_ptr<Model>;
@@ -49,18 +49,18 @@ namespace qe { namespace entity {
 
 	// Tags
 	namespace tags {
-        QString QEENTITY_EXPORT modelName() noexcept;
+		QString QEENTITY_EXPORT modelName() noexcept;
 
-        QString QEENTITY_EXPORT entityName() noexcept;
-        QString QEENTITY_EXPORT entityMaxLength() noexcept;
-        QString QEENTITY_EXPORT isNullable() noexcept;
-        QString QEENTITY_EXPORT isAutoIncrementable() noexcept;
-        QString QEENTITY_EXPORT isParentExported() noexcept;
-        QString QEENTITY_EXPORT isEnabled() noexcept;
-	
-        QString QEENTITY_EXPORT mappingType() noexcept;
-        QString QEENTITY_EXPORT mappingEntity() noexcept;
-	
-        QString QEENTITY_EXPORT primaryKey() noexcept;
+		QString QEENTITY_EXPORT entityName() noexcept;
+		QString QEENTITY_EXPORT entityMaxLength() noexcept;
+		QString QEENTITY_EXPORT isNullable() noexcept;
+		QString QEENTITY_EXPORT isAutoIncrementable() noexcept;
+		QString QEENTITY_EXPORT isParentExported() noexcept;
+		QString QEENTITY_EXPORT isEnabled() noexcept;
+
+		QString QEENTITY_EXPORT mappingType() noexcept;
+		QString QEENTITY_EXPORT mappingEntity() noexcept;
+
+		QString QEENTITY_EXPORT primaryKey() noexcept;
 	}
 }}
