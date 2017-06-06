@@ -66,4 +66,70 @@ namespace qe { namespace entity {
 				}
 			}
 	};
+
+	class OneToManySimpleTypeAdapter
+	{
+		Q_GADGET
+		Q_PROPERTY( int id MEMBER m_id)
+		Q_PROPERTY( QString value MEMBER m_value)
+
+		public:
+			OneToManySimpleTypeAdapter( const QString& value = QString(), int id = 0);
+			OneToManySimpleTypeAdapter( const OneToManySimpleTypeAdapter& other ) noexcept;
+			OneToManySimpleTypeAdapter( OneToManySimpleTypeAdapter&& other ) noexcept;
+
+			inline 
+			bool operator<( const OneToManySimpleTypeAdapter& other) const noexcept
+			{ return m_id < other.m_id;}
+
+			inline
+			int id() const noexcept
+			{ return m_id;}
+
+			inline
+			QString value() const noexcept
+			{ return m_value;}
+
+		private:
+			int m_id;
+			QString m_value;	
+	};
+
+
+	template< class C>
+	class OneToManySimpleAdapter
+	{
+		private:
+			C& m_container;
+			using CValueType = typename C::value_type;
+
+		public: 
+			using SimpleAdapterList = std::vector<OneToManySimpleAdapter>;
+
+			OneToManySimpleAdapter(C& container) 
+				:m_container( container)
+			{}
+
+			SimpleAdapterList operator()() const
+			{
+				SimpleAdapterList sal;
+				sal.reserve( m_container.size());
+
+				int id = 0;
+				for( CValueType& item: m_container)
+				  sal.emplace_back( id++, item);	
+				
+				return sal;
+			}
+
+			void operator()( SimpleAdapterList values)
+			{
+				m_container.clear();
+				sort( begin(values), end(values));
+
+				for( const OneToManySimpleAdapter& item: values)
+					m_container.push_back( item.value());
+			}
+	};
+
 }}

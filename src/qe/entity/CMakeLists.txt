@@ -7,6 +7,7 @@ set( QEEntity_BUILD_VERSION 0)
 # Source
 set( QEEntity_SRCS
 	Global.hpp
+	OneToManyAdapter.cpp
 	AbstractS11nContext.cpp AbstractSerializer.cpp
 	Types.cpp EntityDef.cpp RelationDef.cpp
 	Model.cpp ModelRepository.cpp)
