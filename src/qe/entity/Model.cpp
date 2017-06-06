@@ -24,6 +24,7 @@
  * $QE_END_LICENSE$
  */
 #include "Model.hpp"
+#include "ModelPrivate.hpp"
 #include "EntityDef.hpp"
 #include "RelationDef.hpp"
 #include <QMetaProperty>
@@ -37,228 +38,147 @@ using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcModel,
 	"com.dmious.ipmo.qe.entity.model");
 
-namespace {
-	
-	QString classId() noexcept
-	{ return QStringLiteral("class");}
+/**
+ * \class qe::entity::Model
+ * \since 1.0.0
+ */
 
-	/// @brief It gets the primary keys from annotation.
-	/// 
-	/// If there is no explicit primary key, it will use the first
-	/// 'auto_increment' file as a primary key.
-	/// If there is not primary key neither 'auto_increment', then
-	/// all en
-	EntityDefList parsePrimaryKeys( const Model & model)
-	{
-		EntityDefList pk;
-		QStringList pkPropertyNames = model.annotation( 
-				classId(),
-				tags::primaryKey())
-			.value( QString()).toString()
-			.split( ',', QString::SkipEmptyParts);
+Model::Model( QExplicitlySharedDataPointer<ModelPrivate>&& d)
+	: qe::annotation::Model( d)
+{}
 
-		if( pkPropertyNames.isEmpty())
-		{
-			// If empty, try 'auto_increment' entity.
-			const auto colDef = model.findEntityDef( Model::findByAutoIncrement{});
-			if( colDef)
-				pkPropertyNames << colDef->propertyName();
-		}
-
-		for( QString pkPropName: pkPropertyNames)
-		{
-			const auto colDef = model.findEntityDef(
-					Model::findByPropertyName{ pkPropName.toLocal8Bit()});
-			
-			if( colDef )
-				pk.push_back( *colDef);
-		}
-		
-		// If it is still empty, use all entities as primary key.
-		if( pk.empty())
-			pk = model.entityDefs();
-
-		return pk;
-	}
-
-	/// @brief It checks if property is register into Qt metatype system.
-	bool isPropertyTypeRegister( const QMetaObject* mo, const QMetaProperty& property)
-	{
-		const int propType = property.userType();
-		const bool isRegistered = QMetaType::isRegistered( propType);
-		
-		if( propType == QMetaType::Type::UnknownType ||
-			! isRegistered)
-		{
-			qCCritical( lcModel) << QString ("Property %1:%2 is not register and will be ignore."
-				"Please use QMetaType::qRegisterMetaType and Q_DECLARE_METATYPE")
-				.arg( mo->className()).arg( property.name());
-		}
-		
-		return propType != QMetaType::Type::UnknownType
-			&& isRegistered; 
-	}
-}
-
-// Class Model
-// ============================================================================
+Model::Model( const QExplicitlySharedDataPointer<ModelPrivate>& d)
+	: qe::annotation::Model( d)
+{}
 
 Model::Model( const QMetaObject* metaObj)
-	: qe::annotation::Model( metaObj) 
+	: Model(
+		QExplicitlySharedDataPointer<ModelPrivate>(
+			new ModelPrivate( metaObj)))
 {
-	parseAnnotations( metaObj);
-	m_primaryKeyDef = parsePrimaryKeys( *this);
+	Q_D(Model);
+	d->parseAnnotations( metaObj);
 }
 
 Model::Model(
 	const QString & name,
-	const EntityDefList& entities)
-	: qe::annotation::Model( nullptr),
-	m_name( name),
-	m_entityDefs( entities)
+	const EntityDefList& entities /*,
+	const Model& refModel*/)
+	: qe::annotation::Model(
+		QExplicitlySharedDataPointer<ModelPrivate>(
+			new ModelPrivate( name, entities)))
 {
-	m_primaryKeyDef = parsePrimaryKeys( *this);
+#if 0
+	addReferenceManyToOne(
+		QString( "%1_fk_%1").arg( name, refModel.name()).toUtf8(),
+		refModel);
+#endif
 }
 
+bool Model::operator == ( const Model& other) const noexcept
+{ return d_ptr == other.d_ptr; }
 
 const QString& Model::name() const noexcept
-{ return m_name; }
+{
+	const Q_D(Model);
+	return d->name;
+}
 
 const EntityDefList& Model::entityDefs() const noexcept
-{ return m_entityDefs; }
+{
+	const Q_D(Model);
+	return d->entityDefs;
+}
 
 const EntityDefList& Model::primaryKeyDef() const noexcept
-{ return m_primaryKeyDef; }
+{
+	const Q_D(Model);
+	return d->primaryKey();
+}
 
 const RelationDefList & Model::referencesManyToOneDefs() const noexcept
-{ return m_referencesManyToOneDefs; }
+{
+	const Q_D(Model);
+	return d->referencesManyToOneDefs;
+}
 
 void Model::addReferenceManyToOne(
 	const QByteArray& propertyName,
-	const ModelShd &reference)
+	const Model &reference)
 {
+	Q_D(Model);
 	RelationDefShd fkDef = make_shared<RelationDef>( propertyName, reference);
 
 	// Fix fk column names to avoid duplicates.
 	for( auto & fkColDef: fkDef->relationKey)
 	{
 		QString fkColName = fkColDef.entityName();
-		auto colDef = findEntityDef( findByEntityName{ fkColName });
+		auto colDef = findEntityDef( FindEntityDefByEntityName{ fkColName });
 		if( colDef )
 		{
 			uint colissionIdx = 0;
-			fkColName = reference->name() 
+			fkColName = reference.name()
 				% QStringLiteral("_") 
 				% fkColDef.entityName();
 
-			colDef =  findEntityDef( findByEntityName{ fkColName });
+			colDef =  findEntityDef( FindEntityDefByEntityName{ fkColName });
 			while( colDef )
 			{
-				fkColName = QString("%1_%2_%3").arg( reference->name())
+				fkColName = QString("%1_%2_%3").arg( reference.name())
 					.arg( fkColDef.entityName()).arg( ++colissionIdx);
-				colDef = findEntityDef( findByEntityName{ fkColName });
+				colDef = findEntityDef( FindEntityDefByEntityName{ fkColName });
 			}
 		}
 		
 		// Update RelationDef 
 		fkColDef.setEntityName( fkColName);
 		fkColDef.setMappedType( EntityDef::MappedType::ManyToOne);
-		m_entityDefs.push_back( fkColDef);
+		d->entityDefs.push_back( fkColDef);
 	}
 
 	// Copy ref
-	m_referencesManyToOneDefs.push_back( fkDef);
+	d->referencesManyToOneDefs.push_back( fkDef);
 }
 
-void Model::parseAnnotations( const QMetaObject* metaObj)
+optional<EntityDef> Model::findEntityDef(const FindEntityDefByPropertyName& property) const noexcept
 {
-	// Class annotation 
-	m_name = annotation( classId(), 
-		qe::entity::tags::modelName())
-			.value( QString( metaObj->className())).toString();
-
-	// Entity 
-	const bool exportParents = annotation( classId(),
-		  qe::entity::tags::isParentExported())
-		.value( false).toBool();
-	const int begin = (exportParents) ? 0 : metaObj->propertyOffset();
-
-	for( int i = begin; i < metaObj->propertyCount(); ++i)
-	{
-		const QMetaProperty property = metaObj->property(i);
-		if( isPropertyTypeRegister( metaObj, property))
-		{
-			const QByteArray propertyName = property.name();
-			const bool isEnable = annotation( propertyName, 
-											  qe::entity::tags::isEnabled())
-			.value( true).toBool();
-			
-			if( isEnable )
-			{
-				if( property.isEnumType())
-					m_entityDefs.emplace_back(
-						propertyName,
-						property.enumerator(),
-						this);
-				else
-					m_entityDefs.emplace_back(
-						propertyName,
-						property.type(),
-						0,
-						this);
-			}
-		}
-	}
+	const Q_D(Model);
+	return d->findEntityDef( property);
 }
 
-optional<EntityDef> Model::findEntityDef( Model::FindColDefPredicate&& predicate) const noexcept
+optional<EntityDef> Model::findEntityDef(const FindEntityDefByEntityName& entity) const noexcept
 {
-	optional<EntityDef> eDef;
-	const auto itr = find_if( begin( m_entityDefs), end( m_entityDefs), predicate);
-	if( itr != end( m_entityDefs))
-		eDef = *itr;
-
-	return eDef;
-}
-
-optional<EntityDef> Model::findEntityDef(const Model::findByPropertyName& property) const noexcept
-{
-	return findEntityDef( 
-		[&property]( const EntityDef& eDef) -> bool
-			{ return eDef.propertyName() == property.name;});
-}
-
-optional<EntityDef> Model::findEntityDef(const Model::findByEntityName& entity) const noexcept
-{
-	return findEntityDef( 
-		[&entity]( const EntityDef& colDef) -> bool
-			{ return colDef.entityName() == entity.name;});
+	const Q_D(Model);
+	return d->findEntityDef( entity);
 }
 
 /// @internal It only searchs on "NoMappedType" fields, in order to find just
 /// auto-increment fields in this model.
-optional<EntityDef> Model::findEntityDef( const Model::findByAutoIncrement& ) const noexcept
+optional<EntityDef> Model::findEntityDef( const FindEntityDefByAutoIncrement &p) const noexcept
 {
-	return findEntityDef( 
-		[]( const EntityDef& colDef) -> bool
-			{
-				return
-					colDef.isAutoIncrement()
-					&& colDef.mappedType() == EntityDef::MappedType::NoMappedType;
-			});
+	const Q_D(Model);
+	return d->findEntityDef( p);
 }
 
-const RelationDefShd Model::findRelationTo( const ModelShd& model) const noexcept
+optional<EntityDef> Model::findEntityDef(
+	EntityDefPredictate&& predicate) const noexcept
 {
+	const Q_D(Model);
+	return d->findEntityDef( std::move(predicate));
+}
+
+const RelationDefShd Model::findRelationTo( const Model& model) const noexcept
+{
+	const Q_D(Model);
 	RelationDefShd fk;
 
 	const auto itr = find_if( 
-		begin( m_referencesManyToOneDefs), 
-		end( m_referencesManyToOneDefs),
+		begin( d->referencesManyToOneDefs),
+		end( d->referencesManyToOneDefs),
 		[model]( const RelationDefShd& fkDef) -> bool
 			{ return fkDef->reference() == model;});
 
-	if( itr != end( m_referencesManyToOneDefs))
+	if( itr != end( d->referencesManyToOneDefs))
 		fk = *itr;
 
 	return fk;

@@ -27,6 +27,9 @@
 
 #pragma once
 #include <QVariant>
+#include <QList>
+#include <algorithm>
+#include <iterator>
 
 namespace qe { namespace entity {
 
@@ -54,7 +57,7 @@ namespace qe { namespace entity {
 			}
 
 			/// @brief This write function stores all elements from QVariantList to
-			/// the native container. 
+			/// the native container.
 			void operator()( const QVariantList& list)
 			{
 				using CItem = typename C::value_type;
@@ -71,28 +74,22 @@ namespace qe { namespace entity {
 	{
 		Q_GADGET
 		Q_PROPERTY( int id MEMBER m_id)
-		Q_PROPERTY( QString value MEMBER m_value)
+		Q_PROPERTY( QVariant value MEMBER m_value)
 
 		public:
-			OneToManySimpleTypeAdapter( const QString& value = QString(), int id = 0);
+			OneToManySimpleTypeAdapter( const QVariant& value, int id = 0);
 			OneToManySimpleTypeAdapter( const OneToManySimpleTypeAdapter& other ) noexcept;
 			OneToManySimpleTypeAdapter( OneToManySimpleTypeAdapter&& other ) noexcept;
 
-			inline 
-			bool operator<( const OneToManySimpleTypeAdapter& other) const noexcept
-			{ return m_id < other.m_id;}
+			OneToManySimpleTypeAdapter& operator=( const OneToManySimpleTypeAdapter& other);
+			bool operator<( const OneToManySimpleTypeAdapter& other) const noexcept;
 
-			inline
-			int id() const noexcept
-			{ return m_id;}
-
-			inline
-			QString value() const noexcept
-			{ return m_value;}
+			int id() const noexcept;
+			QVariant value() const noexcept;
 
 		private:
 			int m_id;
-			QString m_value;	
+			QVariant m_value;
 	};
 
 
@@ -104,31 +101,31 @@ namespace qe { namespace entity {
 			using CValueType = typename C::value_type;
 
 		public: 
-			using SimpleAdapterList = std::vector<OneToManySimpleAdapter>;
+			using List = QList<OneToManySimpleTypeAdapter>;
 
 			OneToManySimpleAdapter(C& container) 
 				:m_container( container)
 			{}
 
-			SimpleAdapterList operator()() const
+			List operator()() const
 			{
-				SimpleAdapterList sal;
-				sal.reserve( m_container.size());
+				List sal;
+				// sal.reserve( m_container.size());
 
 				int id = 0;
 				for( CValueType& item: m_container)
-				  sal.emplace_back( id++, item);	
-				
+					sal.push_back( OneToManySimpleTypeAdapter(item, id++));
+
 				return sal;
 			}
 
-			void operator()( SimpleAdapterList values)
+			void operator()( List values)
 			{
 				m_container.clear();
-				sort( begin(values), end(values));
+				std::sort( std::begin(values), std::end(values));
 
-				for( const OneToManySimpleAdapter& item: values)
-					m_container.push_back( item.value());
+				for( const auto& item: values)
+					m_container.push_back( item.value().value<CValueType>());
 			}
 	};
 

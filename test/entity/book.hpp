@@ -16,7 +16,9 @@ class Book
 	Q_PROPERTY( QByteArray binSignature MEMBER binSignature)
 	Q_PROPERTY( int entityDisable MEMBER entityDisable )
 	Q_PROPERTY( QStringList footNotes MEMBER footNotes)
+
 	Q_PROPERTY( QVariantList chapters READ chaptersAdapter WRITE chaptersAdapter)
+	// Q_PROPERTY( QList<qe::entity::OneToManySimpleTypeAdapter> footNotes READ footNotesAdapter WRITE footNotesAdapter)
 
 	// Annotations
 	Q_CLASSINFO( "class", "@qe.model.name=book")
@@ -26,7 +28,8 @@ class Book
 	Q_CLASSINFO( "pages", "@qe.entity.maxLength=512")
 	Q_CLASSINFO( "entityDisable", "@qe.entity.isEnabled=false")
 	Q_CLASSINFO( "chapters", "@qe.entity.mapping.entity=Chapter @qe.entity.mapping.type=OneToMany")
-	
+	// Q_CLASSINFO( "footNotes", "@qe.entity.mapping.type=OneToMany")
+
 	public:
 		int id;
 		QString title;
@@ -37,5 +40,7 @@ class Book
 		QStringList footNotes;
 
 		std::vector<Chapter> chapters;
+
 		qe::entity::OneToManyAdapter< decltype(chapters)> chaptersAdapter{ chapters};
+		qe::entity::OneToManySimpleAdapter< decltype(footNotes)> footNotesAdapter { footNotes };
 };

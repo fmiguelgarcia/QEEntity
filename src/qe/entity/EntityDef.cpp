@@ -60,7 +60,7 @@ EntityDef::EntityDef(
 	const QByteArray &property,
 	const int type,
 	const uint maxLength,
-	const qe::entity::Model *model)
+	const optional<Model>& model)
 	: d_ptr(
 		new EntityDefPrivate( property, type, maxLength, model))
 {}
@@ -69,7 +69,7 @@ EntityDef::EntityDef(
 EntityDef::EntityDef(
 	const QByteArray &property,
 	const QMetaEnum& me,
-	const qe::entity::Model *model)
+	const optional<Model>& model)
 	: d_ptr( new EntityDefPrivate( property, me, model))
 {}
 
@@ -154,7 +154,7 @@ const EntityDef::MappedFetch EntityDef::mappedFetch() const noexcept
 	return static_cast<EntityDef::MappedFetch>( d->mappedFetch);
 }
 
-shared_ptr<qe::entity::Model> EntityDef::mappedModel() const noexcept
+optional<qe::entity::Model> EntityDef::mappedModel() const noexcept
 {
 	const Q_D(EntityDef);
 	return d->mappedModel;
@@ -195,7 +195,7 @@ void EntityDef::setNullable(const bool value)
 bool EntityDef::isEnum() const noexcept
 {
 	const Q_D(EntityDef);
-	return d->isNullable;
+	return static_cast<bool>( d->metaEnum);
 }
 
 /// @return It returns the meta-enum information if it is an Enum

@@ -28,6 +28,7 @@
 #pragma once
 #include <qe/common/Common.hpp>
 #include <qe/entity/Global.hpp>
+#include <qe/entity/Model.hpp>
 #include <QLoggingCategory>
 #include <QString>
 #include <QByteArray>
@@ -64,12 +65,14 @@ namespace qe { namespace entity {
 				const QByteArray &property,
 				const int type,
 				const uint maxLength = 0,
-				const qe::entity::Model *model = nullptr);
+				const qe::common::optional<qe::entity::Model>& model =
+					qe::common::optional<qe::entity::Model>());
 
 			EntityDef(
 				const QByteArray &property,
 				const QMetaEnum& me,
-				const qe::entity::Model *model = nullptr);
+				const qe::common::optional<qe::entity::Model>& model =
+					qe::common::optional<qe::entity::Model>());
 
 			EntityDef( EntityDef&& ) noexcept;
 			EntityDef( const EntityDef& ) noexcept;
@@ -91,7 +94,7 @@ namespace qe { namespace entity {
 			const MappedType mappedType() const noexcept;
 			void setMappedType( const MappedType mt) noexcept;
 			const MappedFetch mappedFetch() const noexcept;
-			std::shared_ptr<qe::entity::Model> mappedModel() const noexcept;
+			qe::common::optional<qe::entity::Model> mappedModel() const noexcept;
 
 			uint maxLength() const noexcept;
 			bool isAutoIncrement() const noexcept;

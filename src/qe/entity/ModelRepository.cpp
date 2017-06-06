@@ -69,32 +69,33 @@ ModelRepository& ModelRepository::instance()
 			
 ModelRepository::ModelRepository() = default;
 
-ModelShd ModelRepository::model( const QMetaObject *metaObject) const
+Model ModelRepository::model( const QMetaObject *metaObject) const
 {
 	return findOrCreateUsingDoubleCheckLocking( 
 		m_models, metaObject, m_modelsMtx, 
 		[this,metaObject](){ return makeModel( metaObject);});
 }
 
-ModelShd ModelRepository::makeModel( const QMetaObject* metaObj) const
-// { return make_shared<Model>( metaObj);}
+Model ModelRepository::makeModel( const QMetaObject* metaObj) const
 { 
-	ModelShd lmodel ( new Model( metaObj));
+	Model lmodel( metaObj);
 
+#if 0
 	// Relation one to many
-	for( const auto& eDef: lmodel->entityDefs())
+	for( const auto& eDef: lmodel.entityDefs())
 	{
 		const auto mappingType = eDef.mappedType();
 		if( mappingType == EntityDef::MappedType::OneToMany)
 		{
-			const auto mo = eDef.mappedModel();
+			auto mo = eDef.mappedModel();
 			if( mo )
 				mo->addReferenceManyToOne(
 					eDef.propertyName(),
 					lmodel);
 		}
 	}
+#endif
 
 	return lmodel;
-}	
+}
 

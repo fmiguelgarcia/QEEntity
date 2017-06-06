@@ -24,33 +24,34 @@
  * $QE_END_LICENSE$
  */
 #pragma once
-#include <qe/common/Common.hpp>
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
+#include <qe/common/Common.hpp>
 #include <qe/annotation/Model.hpp>
 #include <QLoggingCategory>
-#include <QMetaObject>
 #include <functional>
 
 namespace qe { namespace entity
 {
+	class ModelPrivate;
 	class ModelRepository;
-
 	Q_DECLARE_LOGGING_CATEGORY( lcModel);
+
 	/// @brief This model parse the Orm annotations
     class QEENTITY_EXPORT Model : public qe::annotation::Model
 	{
 		friend class qe::entity::ModelRepository;
 		public:
-			using FindColDefPredicate = std::function<bool(const EntityDef&)>;
-
-			struct findByPropertyName { const QByteArray name; };
-			struct findByEntityName { const QString name; };
-			struct findByAutoIncrement {};
 
 			Model(
 				const QString & name,
-				const EntityDefList& entities);
+				const EntityDefList& entities /*,
+				const Model& refModel*/);
+
+			explicit Model( QExplicitlySharedDataPointer<ModelPrivate>&& d);
+			explicit Model( const QExplicitlySharedDataPointer<ModelPrivate>& d);
+
+			bool operator == ( const Model& other) const noexcept;
 
 			// DB 	
 			/// @return Database table name.
@@ -66,41 +67,34 @@ namespace qe { namespace entity
 			const RelationDefList& referencesManyToOneDefs() const noexcept;
 
 			/// @brief Add reference Many (this model) to one @p reference
-			void addReferenceManyToOne( const QByteArray& propertyName, 
-					const ModelShd& reference);
-
-			// Find utils	
-			/// @brief It finds column definitions by property name.
-			qe::common::optional<EntityDef> findEntityDef( const findByPropertyName& pn) const noexcept;
+			void addReferenceManyToOne(
+				const QByteArray& propertyName,
+				const Model& reference);
 
 			/// @brief It finds column definitions by table column name.
-			qe::common::optional<EntityDef> findEntityDef( const findByEntityName& cn) const noexcept;
-			
-			/// @brief It finds column definition if auto_increment is enabled. 
-			qe::common::optional<EntityDef> findEntityDef( const findByAutoIncrement& ) const noexcept;
-		
-			/// @brief It finds the column definition that returns true on @p
+			qe::common::optional<EntityDef> findEntityDef(
+				const FindEntityDefByEntityName& cn) const noexcept;
+
+			qe::common::optional<EntityDef> findEntityDef(
+				const FindEntityDefByAutoIncrement& ) const noexcept;
+
+			/// @brief It finds column definition if auto_increment is enabled.
+			qe::common::optional<EntityDef> findEntityDef(
+				const FindEntityDefByPropertyName& ) const noexcept;
+
+				/// @brief It finds the column definition that returns true on @p
 			/// predicate.
-			qe::common::optional<EntityDef> findEntityDef( FindColDefPredicate&& predicate) const noexcept;
+			qe::common::optional<EntityDef> findEntityDef(
+				EntityDefPredictate&& predicate) const noexcept;
 
 			/// @brief It returns the foreign key definition for specific model. 
-			const RelationDefShd findRelationTo( const ModelShd& model) const noexcept;	
+			const RelationDefShd findRelationTo( const Model& model) const noexcept;
 
 		protected:
 			/// @brief Create and parse annotations from @p meta.
 			explicit Model( const QMetaObject* meta);
 
-			Model( const Model&) = delete;
-			Model& operator=( const Model&) = delete;
-
 		private:
-			/// @brief It parses the annotation from @p meta.
-			void parseAnnotations( const QMetaObject* meta);
-
-			QString m_name;							///< Model name.
-			EntityDefList m_entityDefs;			///< Model column definitions.
-			EntityDefList m_primaryKeyDef;		///< Model primary key definition.
-
-			RelationDefList m_referencesManyToOneDefs;	///< Many to one defs.
+			Q_DECLARE_PRIVATE(Model);
 	};
 }}

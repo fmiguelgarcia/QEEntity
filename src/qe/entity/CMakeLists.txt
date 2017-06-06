@@ -14,7 +14,9 @@ set( QEEntity_SRCS
 	EntityDefPrivate.cpp
 	EntityDef.cpp
 	RelationDef.cpp
-	Model.cpp ModelRepository.cpp)
+	ModelPrivate.cpp
+	Model.cpp
+	ModelRepository.cpp)
 add_definitions( -DQEENTITY_LIBRARY)
 
 # Link

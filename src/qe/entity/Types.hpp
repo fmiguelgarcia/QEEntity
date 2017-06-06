@@ -25,6 +25,7 @@
  */
 #pragma once
 #include <qe/entity/Global.hpp>
+#include <qe/common/Common.hpp>
 #include <QString>
 #include <memory>
 #include <vector>
@@ -38,11 +39,15 @@ namespace qe { namespace entity {
 	class RelationDef;
 	class Model;
 
-	// using EntityDefShd = std::shared_ptr<EntityDef>;
 	using EntityDefList = std::vector<EntityDef>;
+	using EntityDefPredictate = std::function< bool( const EntityDef& )>;
+
 	using RelationDefShd = std::shared_ptr<RelationDef>;
 	using RelationDefList= std::vector<RelationDefShd>;
-	using ModelShd = std::shared_ptr<Model>;
+
+	struct FindEntityDefByPropertyName { const QByteArray name; };
+	struct FindEntityDefByEntityName { const QString name; };
+	struct FindEntityDefByAutoIncrement {};
 
 	// Context
 	using ObjectContext = std::deque<QObject*>;

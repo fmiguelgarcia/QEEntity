@@ -32,10 +32,10 @@ using namespace std;
 
 RelationDef::RelationDef( 
 		const QByteArray& propertyName,
-		const ModelShd& reference )
+		const Model& reference )
 	: m_propertyName( propertyName), m_reference( reference)
 {
-	for( const auto& pkDef : reference->primaryKeyDef())
+	for( const auto& pkDef : reference.primaryKeyDef())
 	{
 		EntityDef fk = pkDef;
 		fk.detach();
@@ -49,6 +49,6 @@ RelationDef::~RelationDef()
 const QByteArray& RelationDef::propertyName() const noexcept
 { return m_propertyName;}
 	 
-ModelShd RelationDef::reference() const noexcept
+Model RelationDef::reference() const noexcept
 { return m_reference; }
 

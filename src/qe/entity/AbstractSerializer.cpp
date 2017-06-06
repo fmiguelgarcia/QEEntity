@@ -65,7 +65,7 @@ void AbstractSerializer::save(
 	AbstractS11nContext* const context) const
 {
 	const QMetaObject* metaObject = checkAndGetMetaObject( source);
-	ModelShd lmodel = checkAndGetModel( metaObject);
+	Model lmodel = checkAndGetModel( metaObject);
 
 	save( lmodel, source, context);
 }
@@ -75,18 +75,12 @@ void AbstractSerializer::load(
 	const AbstractS11nContext* const context) const
 {
 	const QMetaObject* metaObject = checkAndGetMetaObject( target);
-	ModelShd lmodel = checkAndGetModel( metaObject);
+	Model lmodel = checkAndGetModel( metaObject);
 
 	load( lmodel, target, context);
 }
 
-ModelShd AbstractSerializer::checkAndGetModel( const QMetaObject* metaObject) const
+Model AbstractSerializer::checkAndGetModel( const QMetaObject* metaObject) const
 {
-	ModelShd lmodel = ModelRepository::instance().model( metaObject);
-	if( !lmodel)
-		Exception::makeAndThrow( 
-				QStringLiteral( "Serializer cannot find a model for object class ")
-			.arg( metaObject->className()));	
-
-	return lmodel;
+	return ModelRepository::instance().model( metaObject);
 }

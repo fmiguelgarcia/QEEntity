@@ -25,7 +25,7 @@
  */
 #pragma once
 #include <qe/entity/Global.hpp>
-#include <qe/entity/Types.hpp>
+#include <qe/entity/Model.hpp>
 
 namespace qe { namespace entity { 
 	class RelationDefPrivate;
@@ -39,14 +39,14 @@ namespace qe { namespace entity {
 			/// @param reference Reference entity.
 			RelationDef(
 					const QByteArray& propertyName,
-					const ModelShd& reference);
+					const Model& reference);
 			~RelationDef();
 
 			/// @return It returns the property name.
 			const QByteArray& propertyName() const noexcept;
 
 			/// @return It return the reference model.
-			ModelShd reference() const noexcept;
+			Model reference() const noexcept;
 
 			EntityDefList relationKey;
 		protected:
@@ -54,7 +54,7 @@ namespace qe { namespace entity {
 
 		private:
 			const QByteArray m_propertyName;
-			ModelShd m_reference;
+			Model m_reference;
 
 			Q_DECLARE_PRIVATE( RelationDef);
 	};

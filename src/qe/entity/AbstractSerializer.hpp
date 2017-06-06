@@ -49,19 +49,19 @@ namespace qe { namespace entity {
 
 		protected:
 			virtual void save( 
-					const ModelShd& model, 
+					const Model& model,
 					QObject *const source, 
 					AbstractS11nContext* const context) const = 0;
 
 			virtual void load( 
-					const ModelShd& model, 
+					const Model& model,
 					QObject *const target,
 					const AbstractS11nContext*const context) const = 0;
 
 			AbstractSerializerPrivate * d_ptr;
 
 		private:
-			ModelShd checkAndGetModel( const QMetaObject* metaObject) const;
+			Model checkAndGetModel( const QMetaObject* metaObject) const;
 
 			Q_DECLARE_PRIVATE( AbstractSerializer);
 	};

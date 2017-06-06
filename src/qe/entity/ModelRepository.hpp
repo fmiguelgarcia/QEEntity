@@ -39,16 +39,16 @@ namespace qe { namespace entity {
 			static ModelRepository& instance();
 
 			/// @brief It gets the Orm model associated to @p metaObject.
-			ModelShd model( const QMetaObject *metaObject) const;
+			Model model( const QMetaObject *metaObject) const;
 
 		private:
 			ModelRepository();
 			ModelRepository( const ModelRepository&) = delete;
 		
-			ModelShd makeModel( const QMetaObject* metaObj) const;
+			Model makeModel( const QMetaObject* metaObj) const;
 
 		private:
 			mutable std::recursive_mutex m_modelsMtx;
-			mutable std::map<const QMetaObject*, ModelShd> m_models;
+			mutable std::map<const QMetaObject*, Model> m_models;
 	};
 }}

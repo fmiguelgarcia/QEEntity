@@ -26,6 +26,7 @@
  */
 #pragma once
 #include <qe/entity/EntityDef.hpp>
+#include <qe/entity/Model.hpp>
 #include <QSharedData>
 #include <memory>
 
@@ -35,21 +36,27 @@ namespace qe { namespace entity {
 	{
 		private:
 			void decodeProperties(const qe::entity::Model &model);
-			void decodeOneToManyRelations(const qe::entity::Model &model);
+			void decodeOneToManyAnnotatedRelations( const qe::entity::Model &model);
+			void decodePointerRelations( const qe::entity::Model &model);
+			void decodeSequentialContainerRelations( const qe::entity::Model &model);
+			void decodeAssociativeContainerRelations( const qe::entity::Model &model);
+
+			bool isSequentialContainer() const noexcept;
+			int getItemType() const noexcept;
 
 		public:
 			EntityDefPrivate(
 				const QByteArray& property,
 				const int type,
-				const uint maxLength = 0,
-				const qe::entity::Model *model = nullptr);
+				const uint maxLength,
+				const qe::common::optional<qe::entity::Model>& model);
 
 			EntityDefPrivate(
 				const QByteArray& property,
 				const QMetaEnum metaEnum,
-				const qe::entity::Model *model = nullptr);
+				const qe::common::optional<qe::entity::Model>& model);
 
-
+		public:
 			QString entityName;					///< Entity name
 			QVariant defaultValue;				///< Default value.
 
@@ -60,13 +67,13 @@ namespace qe { namespace entity {
 			// Mapped Type
 			int mappedType;
 			int mappedFetch;
-			std::shared_ptr<qe::entity::Model> mappedModel;
+			qe::common::optional<qe::entity::Model> mappedModel;
 
 			// Enum
 			qe::common::optional<QMetaEnum> metaEnum;	///< It stores meta-enum info.
 
 			// Constraints
-			uint maxLength 	= 0;
+			uint maxLength 			= 0;
 			bool isAutoIncrement 	= false;
 			bool isNullable 		= true;
 	};

@@ -36,20 +36,21 @@ using namespace qe::common;
 using namespace std;
 
 namespace {
+
 #if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
-       EntityDef::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
-       {
-               static vector<QString> strValues = { "NoMappingType", "OneToOne", "OneToMany", "ManyToOne", "ManyToMany" };
-               EntityDef::MappingType mt = EntityDef::MappingType::NoMappingType;
-               auto itr = find( begin(strValues), end(strValues), mappingTypeStr);
-               if( enumOk )
-                       *enumOk = (itr != end(strValues));
+	EntityDef::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
+	{
+		static vector<QString> strValues = { "NoMappedType", "OneToOne", "OneToMany", "ManyToOne", "ManyToMany" };
+		EntityDef::MappepType mt = EntityDef::MappedType::NoMappedType;
+		auto itr = find( begin(strValues), end(strValues), mappingTypeStr);
+		if( enumOk )
+			*enumOk = (itr != end(strValues));
 
-               if( itr != end(strValues))
-                       mt = static_cast<EntityDef::MappingType>( distance( begin(strValues), itr));
+		if( itr != end(strValues))
+			mt = static_cast<EntityDef::MappedType>( distance( begin(strValues), itr));
 
-               return mt;
-       }
+		return mt;
+	}
 #endif
 
 	/// \brief It checks if property @p propertyName requires a OneToMany
@@ -71,13 +72,9 @@ namespace {
 		const QString& propName)
 	{
 		bool enumOk;
-		QString mappedTypeStr;
-
-		if( typeRequiresOneToManyMapping( model.metaObject(), propName.toUtf8()))
-			mappedTypeStr = QStringLiteral( "OneToMany");
-		else
-			mappedTypeStr = model.annotation( propName,
-				qe::entity::tags::mappingType()).value( QStringLiteral("NoMappingType"))
+		QString mappedTypeStr = model.annotation(
+				propName,
+				qe::entity::tags::mappingType()).value( QStringLiteral("NoMappedType"))
 			.toString();
 
 #if ( QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
@@ -99,21 +96,23 @@ namespace {
 		return mappedType;
 	}
 
-	shared_ptr<Model> createOneToManyForSimpleTypes(
+	Model createOneToManyForSimpleTypes(
 		const QString& modelName,
 		const QByteArray& propertyName,
-		const QVariant::Type type)
+		const QVariant::Type type,
+		const Model& refModel)
 	{
 		EntityDef value( propertyName, type);
-		EntityDef key( "id", QVariant::Type::Int);
-		key.setAutoIncrement();
+		EntityDef key( "index", QVariant::Type::Int);
 
-		shared_ptr<Model> m = make_shared<Model>(
+		Model m (
 			modelName,
-			EntityDefList{ key, value});
+			EntityDefList{ key, value}/*,
+			refModel*/);
 
 		return m;
 	}
+
 }
 
 /**
@@ -125,7 +124,7 @@ EntityDefPrivate::EntityDefPrivate(
 	const QByteArray& property,
 	const int type,
 	const uint maxLength,
-	const qe::entity::Model *model)
+	const optional<Model> & model)
 	: propertyName( property),
 	propertyType( type),
 	maxLength( maxLength)
@@ -136,7 +135,10 @@ EntityDefPrivate::EntityDefPrivate(
 
 		try
 		{
-			decodeOneToManyRelations( *model);
+			decodeOneToManyAnnotatedRelations( *model);
+			decodePointerRelations( *model);
+			decodeSequentialContainerRelations( *model);
+			decodeAssociativeContainerRelations( *model);
 		}
 		catch ( const common::Exception & error )
 		{
@@ -150,12 +152,15 @@ EntityDefPrivate::EntityDefPrivate(
 			|| type == QMetaType::SChar
 			|| type == QMetaType::UChar)
 		this->maxLength = 1;
+
+	if( entityName.isEmpty())
+		entityName = QString::fromUtf8( propertyName);
 }
 
 EntityDefPrivate::EntityDefPrivate(
 	const QByteArray& property,
 	const QMetaEnum me,
-	const qe::entity::Model *model)
+	const optional<Model> &model)
 	: EntityDefPrivate( property, QMetaType::Int, 0, model)
 {
 	metaEnum = me;
@@ -176,7 +181,7 @@ void EntityDefPrivate::decodeProperties(const Model &model)
 			tags::entityMaxLength()).value( 0).toUInt();
 }
 
-void EntityDefPrivate::decodeOneToManyRelations(const qe::entity::Model &model)
+void EntityDefPrivate::decodeOneToManyAnnotatedRelations(const qe::entity::Model &model)
 {
 	QString mappingEntityName = model.annotation( propertyName,
 				  tags::mappingEntity()).value().toString();
@@ -203,12 +208,77 @@ void EntityDefPrivate::decodeOneToManyRelations(const qe::entity::Model &model)
 		}
 		else
 		{
+#ifdef QE_ENTITY_SUPPORT_CONTAINERS
 			mappingEntityName = model.name() % "_" % propertyName;
 			const auto typeId = QVariant::Type::String;
 			mappedModel = createOneToManyForSimpleTypes(
 				mappingEntityName,
 				propertyName,
 				typeId);
+			mappedModel->addReferenceManyToOne(
+					eDef.propertyName(),
+					model);
+#else
+			mappedType = EntityDef::MappedType::NoMappedType;
+			Exception::makeAndThrow(
+				QStringLiteral( "QE Entity does NOT support One to Many relations for simple types"));
+#endif
 		}
 	}
 }
+
+void EntityDefPrivate::decodePointerRelations( const qe::entity::Model &model)
+{ }
+
+void EntityDefPrivate::decodeSequentialContainerRelations(
+	const qe::entity::Model &model)
+{
+	if( isSequentialContainer())
+	{
+		const QString modelName = model.name() % "_" % propertyName;
+		int itemType = getItemType();
+
+		mappedType = EntityDef::MappedType::OneToMany;
+		mappedModel = createOneToManyForSimpleTypes(
+				modelName,
+				propertyName,
+				static_cast<QVariant::Type>( itemType),
+				model);
+	}
+}
+
+void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Model &model)
+{ }
+
+bool EntityDefPrivate::isSequentialContainer() const noexcept
+{
+	bool isSeqContainer;
+	switch( propertyType)
+	{
+		case QMetaType::QStringList:
+		case QMetaType::QByteArrayList:
+		case QMetaType::QJsonArray:
+			isSeqContainer = true;
+			break;
+		default:
+			isSeqContainer = false;
+	}
+
+	return isSeqContainer;
+}
+
+int EntityDefPrivate::getItemType() const noexcept
+{
+	switch( propertyType)
+	{
+		case QMetaType::QByteArrayList:
+			return QMetaType::QByteArray;
+		case QMetaType::QJsonArray:
+			return QMetaType::QJsonValue;
+		case QMetaType::QVariantList:
+		case QMetaType::QStringList:
+		default:
+			return QMetaType::QString;
+	}
+}
+

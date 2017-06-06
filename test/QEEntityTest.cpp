@@ -18,8 +18,12 @@ QEEntityTest::QEEntityTest()
 	m_book->chapters.emplace_back( "Chapter 2");
 
 	// Models
-	m_bookModel = ModelRepository::instance().model( m_book->metaObject());
-	m_chapterModel = ModelRepository::instance().model( m_book->chapters.front().metaObject());
+	m_bookModel.reset(
+		new Model(
+			ModelRepository::instance().model( m_book->metaObject())));
+	m_chapterModel.reset(
+		new Model(
+			ModelRepository::instance().model( m_book->chapters.front().metaObject())));
 }
 
 QEEntityTest::~QEEntityTest()
@@ -33,19 +37,23 @@ void QEEntityTest::checkModelName()
 		
 void QEEntityTest::checkEntityIsEnable()
 {
-	auto entityDef = m_bookModel->findEntityDef( Model::findByEntityName{ "entityDisable"});
+	auto entityDef = m_bookModel->findEntityDef(
+		FindEntityDefByEntityName{ "entityDisable"});
 	QVERIFY( !entityDef);
 
-	entityDef = m_bookModel->findEntityDef( Model::findByEntityName{ "bid"});
+	entityDef = m_bookModel->findEntityDef(
+		FindEntityDefByEntityName{ "bid"});
   	QVERIFY( entityDef);
 }
 
 void QEEntityTest::checkEntityIsParentExported()
 { 
-	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "objectName"});
+	auto entityDef = m_bookModel->findEntityDef(
+		FindEntityDefByPropertyName{ "objectName"});
 	QVERIFY( !entityDef);
 
-	entityDef = m_chapterModel->findEntityDef( Model::findByPropertyName{ "objectName"});
+	entityDef = m_chapterModel->findEntityDef(
+		FindEntityDefByPropertyName{ "objectName"});
 	QVERIFY( entityDef);
 }
 
@@ -65,7 +73,7 @@ void QEEntityTest::checkEntityReferenceOneToMany()
 			QVERIFY( eDef.mappedType() == EntityDef::MappedType::ManyToOne);
 			
 			const auto rDef = m_bookModel->findEntityDef( 
-				Model::findByPropertyName{ eDef.propertyName()});
+				FindEntityDefByPropertyName{ eDef.propertyName()});
 
 			QVERIFY( rDef);
 		}	
@@ -74,13 +82,15 @@ void QEEntityTest::checkEntityReferenceOneToMany()
 
 void QEEntityTest::checkEntityMappingEntity()
 { 
-	auto eDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "chapters"});
+	auto eDef = m_bookModel->findEntityDef(
+		FindEntityDefByPropertyName { "chapters"});
 	QVERIFY( eDef 
 			&& eDef->mappedType() == EntityDef::MappedType::OneToMany
 			&& eDef->mappedModel()
 			&& QStringLiteral("Chapter") == eDef->mappedModel()->name());
 
-	eDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
+	eDef = m_bookModel->findEntityDef(
+		FindEntityDefByPropertyName{ "title"});
 	QVERIFY( eDef 
 			&& eDef->mappedType() == EntityDef::MappedType::NoMappedType
 			&& !eDef->mappedModel());
@@ -91,46 +101,49 @@ void QEEntityTest::checkEntityMappingType()
 
 void QEEntityTest::checkEntityMaxLength()
 { 
-	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
+	auto entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "title"});
 	QVERIFY( entityDef && entityDef->maxLength() == 256);
 
-	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "id"});
+	entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "id"});
 	QVERIFY( entityDef && entityDef->maxLength() == 0);
 }
 
 void QEEntityTest::checkEntityIsAutoIncrementable()
 {
-	auto entityDef = m_bookModel->findEntityDef( Model::findByAutoIncrement{});
+	auto entityDef = m_bookModel->findEntityDef( FindEntityDefByAutoIncrement{});
  	QVERIFY( entityDef && entityDef->isAutoIncrement());
 
-	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "pages"});
+	entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "pages"});
 	QVERIFY( entityDef && ! entityDef->isAutoIncrement());
 
-	entityDef = m_chapterModel->findEntityDef( Model::findByAutoIncrement{});
+	entityDef = m_chapterModel->findEntityDef( FindEntityDefByAutoIncrement{});
 	QVERIFY( !entityDef);
 }
 
 void QEEntityTest::checkEntityIsNullable()
 { 
-	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "author"});
+	auto entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "author"});
 	QVERIFY( entityDef && entityDef->isNullable());
 
-	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
+	entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "title"});
 	QVERIFY( entityDef && entityDef->isNullable() == false);
 }
 
 void QEEntityTest::checkEntityName()
 { 
-	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "id"});
+	auto entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "id"});
 	QVERIFY( entityDef && entityDef->entityName() == "bid");
 	
-	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
+	entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName{ "title"});
 	QVERIFY( entityDef && entityDef->entityName() == "title");
 }
 
 void QEEntityTest::checkEntityOneToManyAutoDetect()
 {
-	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName {"footNotes"});
+#ifndef QE_ENTITY_SUPPORT_CONTAINERS
+	// QSKIP( "Container support is not built");
+#endif
+	auto entityDef = m_bookModel->findEntityDef( FindEntityDefByPropertyName {"footNotes"});
 	QVERIFY( entityDef && entityDef->entityName() == "footNotes");
 	QVERIFY( entityDef->mappedType() == EntityDef::MappedType::OneToMany);
 }

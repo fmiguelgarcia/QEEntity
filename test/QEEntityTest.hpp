@@ -28,7 +28,7 @@ class QEEntityTest
 		
 	private:
 		std::unique_ptr<Book> m_book;
-		qe::entity::ModelShd m_bookModel;
-		qe::entity::ModelShd m_chapterModel;
+		std::unique_ptr<qe::entity::Model> m_bookModel;
+		std::unique_ptr<qe::entity::Model> m_chapterModel;
 };
 

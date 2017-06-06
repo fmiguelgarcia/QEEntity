@@ -25,7 +25,10 @@
  */
 #include "Types.hpp"
 
+using namespace qe::common;
+
 namespace qe { namespace entity { 
+
 
 
 	namespace tags {

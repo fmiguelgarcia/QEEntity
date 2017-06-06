@@ -32,3 +32,9 @@
 #  define QEENTITY_EXPORT Q_DECL_IMPORT
 #endif
 
+#include <QMetaType>
+#include <memory>
+#include <deque>
+
+Q_DECLARE_SMART_POINTER_METATYPE( std::shared_ptr);
+Q_DECLARE_SEQUENTIAL_CONTAINER_METATYPE( std::deque);
