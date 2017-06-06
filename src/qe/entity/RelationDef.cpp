@@ -37,20 +37,15 @@ RelationDef::RelationDef(
 {
 	for( const auto& pkDef : reference->primaryKeyDef())
 	{
-		const EntityDefShd fk = make_shared<EntityDef>(
-				pkDef->propertyName(), pkDef->propertyType(),
-				pkDef->entityName(), pkDef->maxLength());
-
-		m_relationKey.push_back( fk);
+		EntityDef fk = pkDef;
+		fk.detach();
+		relationKey.push_back( fk);
 	}
 }
 
 RelationDef::~RelationDef()
 {}
 	
-const EntityDefList & RelationDef::relationKey() const noexcept
-{ return m_relationKey;}
-
 const QByteArray& RelationDef::propertyName() const noexcept
 { return m_propertyName;}
 	 

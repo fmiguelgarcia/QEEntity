@@ -34,19 +34,19 @@ void QEEntityTest::checkModelName()
 void QEEntityTest::checkEntityIsEnable()
 {
 	auto entityDef = m_bookModel->findEntityDef( Model::findByEntityName{ "entityDisable"});
-	QVERIFY( entityDef.get() == nullptr);
+	QVERIFY( !entityDef);
 
 	entityDef = m_bookModel->findEntityDef( Model::findByEntityName{ "bid"});
-  	QVERIFY( entityDef.get() != nullptr );	
+  	QVERIFY( entityDef);
 }
 
 void QEEntityTest::checkEntityIsParentExported()
 { 
 	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "objectName"});
-	QVERIFY( entityDef.get() == nullptr);
+	QVERIFY( !entityDef);
 
 	entityDef = m_chapterModel->findEntityDef( Model::findByPropertyName{ "objectName"});
-	QVERIFY( entityDef.get() != nullptr);
+	QVERIFY( entityDef);
 }
 
 void QEEntityTest::checkEntityPrimaryKey()
@@ -59,15 +59,15 @@ void QEEntityTest::checkEntityReferenceOneToMany()
 
 	for( const auto& relation: relations)
 	{
-		const EntityDefList& relationKey = relation->relationKey();
+		const EntityDefList& relationKey = relation->relationKey;
 	  	for( const auto& eDef: relationKey)
 		{
-			QVERIFY( eDef->mappingType() == EntityDef::MappingType::ManyToOne);
+			QVERIFY( eDef.mappedType() == EntityDef::MappedType::ManyToOne);
 			
 			const auto rDef = m_bookModel->findEntityDef( 
-				Model::findByPropertyName{ eDef->propertyName()});
+				Model::findByPropertyName{ eDef.propertyName()});
 
-			QVERIFY( rDef.get() != nullptr);
+			QVERIFY( rDef);
 		}	
 	}
 }
@@ -76,14 +76,14 @@ void QEEntityTest::checkEntityMappingEntity()
 { 
 	auto eDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "chapters"});
 	QVERIFY( eDef 
-			&& eDef->mappingType() == EntityDef::MappingType::OneToMany 
-			&& eDef->mappingEntity()
-			&& QStringLiteral("Chapter") == eDef->mappingEntity()->className());
+			&& eDef->mappedType() == EntityDef::MappedType::OneToMany
+			&& eDef->mappedModel()
+			&& QStringLiteral("Chapter") == eDef->mappedModel()->name());
 
 	eDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
 	QVERIFY( eDef 
-			&& eDef->mappingType() == EntityDef::MappingType::NoMappingType
-			&& eDef->mappingEntity() == nullptr);
+			&& eDef->mappedType() == EntityDef::MappedType::NoMappedType
+			&& !eDef->mappedModel());
 }
 
 void QEEntityTest::checkEntityMappingType()
@@ -107,7 +107,7 @@ void QEEntityTest::checkEntityIsAutoIncrementable()
 	QVERIFY( entityDef && ! entityDef->isAutoIncrement());
 
 	entityDef = m_chapterModel->findEntityDef( Model::findByAutoIncrement{});
-	QVERIFY( entityDef.get() == nullptr);
+	QVERIFY( !entityDef);
 }
 
 void QEEntityTest::checkEntityIsNullable()
@@ -126,6 +126,13 @@ void QEEntityTest::checkEntityName()
 	
 	entityDef = m_bookModel->findEntityDef( Model::findByPropertyName{ "title"});
 	QVERIFY( entityDef && entityDef->entityName() == "title");
+}
+
+void QEEntityTest::checkEntityOneToManyAutoDetect()
+{
+	auto entityDef = m_bookModel->findEntityDef( Model::findByPropertyName {"footNotes"});
+	QVERIFY( entityDef && entityDef->entityName() == "footNotes");
+	QVERIFY( entityDef->mappedType() == EntityDef::MappedType::OneToMany);
 }
 
 

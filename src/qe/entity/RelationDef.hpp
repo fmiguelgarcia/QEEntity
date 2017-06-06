@@ -45,19 +45,16 @@ namespace qe { namespace entity {
 			/// @return It returns the property name.
 			const QByteArray& propertyName() const noexcept;
 
-			/// @return It return the foreign key definition.
-			const EntityDefList& relationKey() const noexcept;
-
 			/// @return It return the reference model.
 			ModelShd reference() const noexcept;
 
+			EntityDefList relationKey;
 		protected:
 			RelationDefPrivate* d_ptr;
 
 		private:
 			const QByteArray m_propertyName;
 			ModelShd m_reference;
-			EntityDefList m_relationKey;
 
 			Q_DECLARE_PRIVATE( RelationDef);
 	};

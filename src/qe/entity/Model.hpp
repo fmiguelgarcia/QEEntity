@@ -24,6 +24,7 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/common/Common.hpp>
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
 #include <qe/annotation/Model.hpp>
@@ -41,11 +42,15 @@ namespace qe { namespace entity
 	{
 		friend class qe::entity::ModelRepository;
 		public:
-			using FindColDefPredicate = std::function<bool(const EntityDefShd&)>;
+			using FindColDefPredicate = std::function<bool(const EntityDef&)>;
 
 			struct findByPropertyName { const QByteArray name; };
 			struct findByEntityName { const QString name; };
 			struct findByAutoIncrement {};
+
+			Model(
+				const QString & name,
+				const EntityDefList& entities);
 
 			// DB 	
 			/// @return Database table name.
@@ -66,17 +71,17 @@ namespace qe { namespace entity
 
 			// Find utils	
 			/// @brief It finds column definitions by property name.
-			EntityDefShd findEntityDef( const findByPropertyName& pn) const noexcept;
+			qe::common::optional<EntityDef> findEntityDef( const findByPropertyName& pn) const noexcept;
 
 			/// @brief It finds column definitions by table column name.
-			EntityDefShd findEntityDef( const findByEntityName& cn) const noexcept;
+			qe::common::optional<EntityDef> findEntityDef( const findByEntityName& cn) const noexcept;
 			
 			/// @brief It finds column definition if auto_increment is enabled. 
-			EntityDefShd findEntityDef( const findByAutoIncrement& ) const noexcept;
+			qe::common::optional<EntityDef> findEntityDef( const findByAutoIncrement& ) const noexcept;
 		
 			/// @brief It finds the column definition that returns true on @p
 			/// predicate.
-			EntityDefShd findEntityDef( FindColDefPredicate&& predicate) const noexcept;
+			qe::common::optional<EntityDef> findEntityDef( FindColDefPredicate&& predicate) const noexcept;
 
 			/// @brief It returns the foreign key definition for specific model. 
 			const RelationDefShd findRelationTo( const ModelShd& model) const noexcept;	

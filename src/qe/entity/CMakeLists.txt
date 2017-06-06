@@ -8,8 +8,12 @@ set( QEEntity_BUILD_VERSION 0)
 set( QEEntity_SRCS
 	Global.hpp
 	OneToManyAdapter.cpp
-	AbstractS11nContext.cpp AbstractSerializer.cpp
-	Types.cpp EntityDef.cpp RelationDef.cpp
+	AbstractS11nContext.cpp
+	AbstractSerializer.cpp
+	Types.cpp
+	EntityDefPrivate.cpp
+	EntityDef.cpp
+	RelationDef.cpp
 	Model.cpp ModelRepository.cpp)
 add_definitions( -DQEENTITY_LIBRARY)
 

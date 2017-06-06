@@ -84,11 +84,14 @@ ModelShd ModelRepository::makeModel( const QMetaObject* metaObj) const
 	// Relation one to many
 	for( const auto& eDef: lmodel->entityDefs())
 	{
-		if( eDef->mappingType() == EntityDef::MappingType::OneToMany
-			&& metaObj != eDef->mappingEntity())
+		const auto mappingType = eDef.mappedType();
+		if( mappingType == EntityDef::MappedType::OneToMany)
 		{
-			auto mapModel = model( eDef->mappingEntity());
-			mapModel->addReferenceManyToOne( eDef->propertyName(), lmodel);
+			const auto mo = eDef.mappedModel();
+			if( mo )
+				mo->addReferenceManyToOne(
+					eDef.propertyName(),
+					lmodel);
 		}
 	}
 

@@ -32,6 +32,7 @@
 #include <memory>
 
 using namespace qe::entity;
+using namespace qe::common;
 using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcModel,
 	"com.dmious.ipmo.qe.entity.model");
@@ -59,18 +60,18 @@ namespace {
 		if( pkPropertyNames.isEmpty())
 		{
 			// If empty, try 'auto_increment' entity.
-			EntityDefShd colDef = model.findEntityDef( Model::findByAutoIncrement{});
+			const auto colDef = model.findEntityDef( Model::findByAutoIncrement{});
 			if( colDef)
 				pkPropertyNames << colDef->propertyName();
 		}
 
 		for( QString pkPropName: pkPropertyNames)
 		{
-			EntityDefShd colDef = model.findEntityDef( 
+			const auto colDef = model.findEntityDef(
 					Model::findByPropertyName{ pkPropName.toLocal8Bit()});
 			
 			if( colDef )
-				pk.push_back( colDef);
+				pk.push_back( *colDef);
 		}
 		
 		// If it is still empty, use all entities as primary key.
@@ -106,7 +107,19 @@ Model::Model( const QMetaObject* metaObj)
 	: qe::annotation::Model( metaObj) 
 {
 	parseAnnotations( metaObj);
+	m_primaryKeyDef = parsePrimaryKeys( *this);
 }
+
+Model::Model(
+	const QString & name,
+	const EntityDefList& entities)
+	: qe::annotation::Model( nullptr),
+	m_name( name),
+	m_entityDefs( entities)
+{
+	m_primaryKeyDef = parsePrimaryKeys( *this);
+}
+
 
 const QString& Model::name() const noexcept
 { return m_name; }
@@ -120,35 +133,36 @@ const EntityDefList& Model::primaryKeyDef() const noexcept
 const RelationDefList & Model::referencesManyToOneDefs() const noexcept
 { return m_referencesManyToOneDefs; }
 
-void Model::addReferenceManyToOne( const QByteArray& propertyName, 
-		const ModelShd &reference)
+void Model::addReferenceManyToOne(
+	const QByteArray& propertyName,
+	const ModelShd &reference)
 {
 	RelationDefShd fkDef = make_shared<RelationDef>( propertyName, reference);
 
 	// Fix fk column names to avoid duplicates.
-	for( auto & fkColDef: fkDef->relationKey())
+	for( auto & fkColDef: fkDef->relationKey)
 	{
-		QString fkColName = fkColDef->entityName();
+		QString fkColName = fkColDef.entityName();
 		auto colDef = findEntityDef( findByEntityName{ fkColName });
 		if( colDef )
 		{
 			uint colissionIdx = 0;
 			fkColName = reference->name() 
 				% QStringLiteral("_") 
-				% fkColDef->entityName(); 
+				% fkColDef.entityName();
 
 			colDef =  findEntityDef( findByEntityName{ fkColName });
 			while( colDef )
 			{
 				fkColName = QString("%1_%2_%3").arg( reference->name())
-					.arg( fkColDef->entityName()).arg( ++colissionIdx);
+					.arg( fkColDef.entityName()).arg( ++colissionIdx);
 				colDef = findEntityDef( findByEntityName{ fkColName });
 			}
 		}
 		
 		// Update RelationDef 
-		fkColDef->setEntityName( fkColName);
-		fkColDef->setMappingType( EntityDef::MappingType::ManyToOne);
+		fkColDef.setEntityName( fkColName);
+		fkColDef.setMappedType( EntityDef::MappedType::ManyToOne);
 		m_entityDefs.push_back( fkColDef);
 	}
 
@@ -181,52 +195,57 @@ void Model::parseAnnotations( const QMetaObject* metaObj)
 			
 			if( isEnable )
 			{
-				EntityDefShd colDef;
-
 				if( property.isEnumType())
-					colDef = make_shared<EntityDef>( propertyName, 
-						property.enumerator(), *this);
+					m_entityDefs.emplace_back(
+						propertyName,
+						property.enumerator(),
+						this);
 				else
-					colDef = make_shared<EntityDef>( propertyName, 
-						property.type(), *this);
-
-				m_entityDefs.push_back( colDef);
+					m_entityDefs.emplace_back(
+						propertyName,
+						property.type(),
+						0,
+						this);
 			}
 		}
 	}
-	
-	m_primaryKeyDef = parsePrimaryKeys( *this);
 }
 
-EntityDefShd Model::findEntityDef( Model::FindColDefPredicate&& predicate) const noexcept
+optional<EntityDef> Model::findEntityDef( Model::FindColDefPredicate&& predicate) const noexcept
 {
-	EntityDefShd column;
+	optional<EntityDef> eDef;
 	const auto itr = find_if( begin( m_entityDefs), end( m_entityDefs), predicate);
 	if( itr != end( m_entityDefs))
-		column = *itr;
+		eDef = *itr;
 
-	return column;
+	return eDef;
 }
 
-EntityDefShd Model::findEntityDef(const Model::findByPropertyName& property) const noexcept
+optional<EntityDef> Model::findEntityDef(const Model::findByPropertyName& property) const noexcept
 {
 	return findEntityDef( 
-		[&property]( const EntityDefShd& eDef) -> bool 
-			{ return eDef->propertyName() == property.name;});
+		[&property]( const EntityDef& eDef) -> bool
+			{ return eDef.propertyName() == property.name;});
 }
 
-EntityDefShd Model::findEntityDef(const Model::findByEntityName& entity) const noexcept
+optional<EntityDef> Model::findEntityDef(const Model::findByEntityName& entity) const noexcept
 {
 	return findEntityDef( 
-		[&entity]( const EntityDefShd& colDef) -> bool
-			{ return colDef->entityName() == entity.name;});
+		[&entity]( const EntityDef& colDef) -> bool
+			{ return colDef.entityName() == entity.name;});
 }
 
-EntityDefShd Model::findEntityDef( const Model::findByAutoIncrement& ) const noexcept
+/// @internal It only searchs on "NoMappedType" fields, in order to find just
+/// auto-increment fields in this model.
+optional<EntityDef> Model::findEntityDef( const Model::findByAutoIncrement& ) const noexcept
 {
 	return findEntityDef( 
-		[]( const EntityDefShd& colDef) -> bool
-			{ return colDef->isAutoIncrement();});
+		[]( const EntityDef& colDef) -> bool
+			{
+				return
+					colDef.isAutoIncrement()
+					&& colDef.mappedType() == EntityDef::MappedType::NoMappedType;
+			});
 }
 
 const RelationDefShd Model::findRelationTo( const ModelShd& model) const noexcept
@@ -244,4 +263,3 @@ const RelationDefShd Model::findRelationTo( const ModelShd& model) const noexcep
 
 	return fk;
 }
-
