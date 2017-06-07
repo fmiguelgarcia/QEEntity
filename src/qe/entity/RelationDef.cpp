@@ -39,16 +39,34 @@ RelationDef::RelationDef(
 	{
 		EntityDef fk = pkDef;
 		fk.detach();
-		relationKey.push_back( fk);
+		m_relationKey.push_back( fk);
 	}
+}
+
+RelationDef::RelationDef( const RelationDef& other) noexcept
+	: m_propertyName( other.m_propertyName),
+	m_reference( other.m_reference),
+	m_relationKey( other.m_relationKey)
+{}
+
+RelationDef& RelationDef::operator = ( const RelationDef& other) noexcept
+{
+	m_propertyName = other.m_propertyName;
+	m_reference = other.m_reference;
+	m_relationKey = other.m_relationKey;
+
+	return *this;
 }
 
 RelationDef::~RelationDef()
 {}
-	
+
 const QByteArray& RelationDef::propertyName() const noexcept
 { return m_propertyName;}
-	 
-Model RelationDef::reference() const noexcept
+
+const Model& RelationDef::reference() const noexcept
 { return m_reference; }
+
+const EntityDefList& RelationDef::relationKey() const noexcept
+{ return m_relationKey;}
 

@@ -27,6 +27,7 @@
 
 #pragma once
 #include <qe/annotation/ModelPrivate.hpp>
+#include <qe/entity/RelationDef.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/Types.hpp>
 
@@ -40,9 +41,15 @@ namespace qe { namespace entity {
 				const QMetaObject* meta);
 			ModelPrivate (
 				const QString & name,
-				const EntityDefList& entities);
+				const EntityDefList& entities,
+				const EntityDefList& primaryKey);
 
 			const EntityDefList& primaryKey() const noexcept;
+
+			const EntityDefList& entityDefs() const noexcept;
+			void setEntityDefs( const EntityDefList& eDefs);
+			void pushBackEntityDef( const EntityDef& eDef);
+			void pushFrontEntityDef( const EntityDef& eDef);
 
 			void parseAnnotations( const QMetaObject* metaObj);
 
@@ -59,9 +66,7 @@ namespace qe { namespace entity {
 				const FindEntityDefByEntityName& entity) const noexcept;
 
 		public:
-			QString name;						///< Model name.
-			EntityDefList entityDefs;			///< Model column definitions.
-			RelationDefList referencesManyToOneDefs;	///< Many to one defs.
+			qe::common::optional<RelationDef> refManyToOne;	///< Many to one defs.
 
 		private:
 			void setPrimaryKey( const EntityDefList& pk);
@@ -70,6 +75,7 @@ namespace qe { namespace entity {
 				const QMetaProperty& property);
 
 			EntityDefList m_primaryKeyDef;		///< Model primary key definition.
+			EntityDefList m_entityDefs;			///< Model column definitions.
 	};
 }}
 

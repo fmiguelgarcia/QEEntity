@@ -45,17 +45,13 @@ namespace qe { namespace entity
 
 			Model(
 				const QString & name,
-				const EntityDefList& entities /*,
-				const Model& refModel*/);
+				const EntityDefList& entities,
+				const EntityDefList& primaryKeys);
 
 			explicit Model( QExplicitlySharedDataPointer<ModelPrivate>&& d);
 			explicit Model( const QExplicitlySharedDataPointer<ModelPrivate>& d);
 
 			bool operator == ( const Model& other) const noexcept;
-
-			// DB 	
-			/// @return Database table name.
-			const QString& name() const noexcept;
 
 			/// @return Model column definitions.
 			const EntityDefList& entityDefs() const noexcept;
@@ -64,10 +60,10 @@ namespace qe { namespace entity
 			const EntityDefList& primaryKeyDef() const noexcept;
 
 			/// @return A list of references of type Many to one.
-			const RelationDefList& referencesManyToOneDefs() const noexcept;
+			qe::common::optional<RelationDef> referenceManyToOne() const noexcept;
 
 			/// @brief Add reference Many (this model) to one @p reference
-			void addReferenceManyToOne(
+			void setReferenceManyToOne(
 				const QByteArray& propertyName,
 				const Model& reference);
 
@@ -88,7 +84,8 @@ namespace qe { namespace entity
 				EntityDefPredictate&& predicate) const noexcept;
 
 			/// @brief It returns the foreign key definition for specific model. 
-			const RelationDefShd findRelationTo( const Model& model) const noexcept;
+			qe::common::optional<RelationDef> findRelationTo(
+				const Model& model) const noexcept;
 
 		protected:
 			/// @brief Create and parse annotations from @p meta.

@@ -62,21 +62,17 @@ void QEEntityTest::checkEntityPrimaryKey()
 
 void QEEntityTest::checkEntityReferenceOneToMany()
 {
-	auto relations = m_chapterModel->referencesManyToOneDefs();
-	QVERIFY( relations.size() == 1);
+	const auto relationManyToOne = m_chapterModel->referenceManyToOne();
+	QVERIFY( relationManyToOne);
 
-	for( const auto& relation: relations)
+	for( const auto& eDef: relationManyToOne->relationKey())
 	{
-		const EntityDefList& relationKey = relation->relationKey;
-	  	for( const auto& eDef: relationKey)
-		{
-			QVERIFY( eDef.mappedType() == EntityDef::MappedType::ManyToOne);
+		QVERIFY( eDef.mappedType() == EntityDef::MappedType::ManyToOne);
 			
-			const auto rDef = m_bookModel->findEntityDef( 
-				FindEntityDefByPropertyName{ eDef.propertyName()});
+		const auto rDef = m_bookModel->findEntityDef(
+			FindEntityDefByPropertyName{ eDef.propertyName()});
 
-			QVERIFY( rDef);
-		}	
+		QVERIFY( rDef);
 	}
 }
 

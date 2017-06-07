@@ -53,6 +53,7 @@ namespace {
 	}
 #endif
 
+#if 0
 	/// \brief It checks if property @p propertyName requires a OneToMany
 	/// mapping.
 	/// \internal Right now, only \c StringList type return true.
@@ -66,6 +67,7 @@ namespace {
 
 		return propType == QVariant::Type::StringList;
 	}
+#endif
 
 	EntityDef::MappedType decodeOneToManyRelation(
 		const qe::annotation::Model & model,
@@ -103,12 +105,12 @@ namespace {
 		const Model& refModel)
 	{
 		EntityDef value( propertyName, type);
-		EntityDef key( "index", QVariant::Type::Int);
+		EntityDef key( "idx", QVariant::Type::Int);
 
 		Model m (
 			modelName,
-			EntityDefList{ key, value}/*,
-			refModel*/);
+			EntityDefList{ key, value},
+			EntityDefList{ key});
 
 		return m;
 	}

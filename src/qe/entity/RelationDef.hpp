@@ -40,21 +40,24 @@ namespace qe { namespace entity {
 			RelationDef(
 					const QByteArray& propertyName,
 					const Model& reference);
+			RelationDef( const RelationDef& other) noexcept;
+			RelationDef& operator = ( const RelationDef& other) noexcept;
 			~RelationDef();
 
 			/// @return It returns the property name.
 			const QByteArray& propertyName() const noexcept;
 
 			/// @return It return the reference model.
-			Model reference() const noexcept;
+			const Model& reference() const noexcept;
 
-			EntityDefList relationKey;
+			const EntityDefList& relationKey() const noexcept;
 		protected:
 			RelationDefPrivate* d_ptr;
 
 		private:
-			const QByteArray m_propertyName;
+			QByteArray m_propertyName;
 			Model m_reference;
+			EntityDefList m_relationKey;
 
 			Q_DECLARE_PRIVATE( RelationDef);
 	};

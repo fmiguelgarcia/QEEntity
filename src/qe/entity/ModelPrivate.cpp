@@ -98,10 +98,19 @@ namespace {
 
 		// If it is still empty, use all entities as primary key.
 		if( pk.empty())
-			pk = model.entityDefs;
+			pk = model.entityDefs();
 
 		return pk;
 	}
+
+#ifndef NDEBUG
+	template< class C>
+	bool containsDuplicates( C&& container)
+	{
+		sort( begin(container), end(container));
+		return unique( begin(container), end(container)) != end(container);
+	}
+#endif
 }
 
 ModelPrivate::ModelPrivate(
@@ -111,12 +120,17 @@ ModelPrivate::ModelPrivate(
 
 ModelPrivate::ModelPrivate (
 	const QString & name,
-	const EntityDefList& entities)
-	: qe::annotation::ModelPrivate( nullptr),
-	name( name),
-	entityDefs( entities)
+	const EntityDefList& entities,
+	const EntityDefList& primaryKey)
+	: qe::annotation::ModelPrivate( nullptr)
 {
-	setPrimaryKey( parsePrimaryKeys( *this));
+	setName( name);
+	setEntityDefs( entities);
+
+	if( !primaryKey.empty())
+		setPrimaryKey( primaryKey);
+	else
+		setPrimaryKey( parsePrimaryKeys( *this));
 }
 
 void ModelPrivate::parseAnnotations( const QMetaObject* metaObj)
@@ -124,11 +138,12 @@ void ModelPrivate::parseAnnotations( const QMetaObject* metaObj)
 	if( metaObj)
 	{
 		// Class annotation
-		name = findAnnotation(
+		QString name = findAnnotation(
 				classId(),
 				qe::entity::tags::modelName())
 			.value( QString( metaObj->className()))
 			.toString();
+		setName( name);
 
 		// Entity
 		const bool exportParents = findAnnotation(
@@ -168,16 +183,22 @@ void ModelPrivate::parseAnnotation(
 			Model model = modelFromPrivate( this);
 
 			if( property.isEnumType())
-				entityDefs.emplace_back(
+			{
+				const EntityDef eDef(
 					propertyName,
 					property.enumerator(),
 					model);
+				pushBackEntityDef( eDef);
+			}
 			else
-				entityDefs.emplace_back(
+			{
+				const EntityDef eDef (
 					propertyName,
 					property.type(),
 					0,
 					model);
+				pushBackEntityDef( eDef);
+			}
 		}
 	}
 }
@@ -214,8 +235,8 @@ optional<EntityDef> ModelPrivate::findEntityDef(
 	EntityDefPredictate&& predicate) const noexcept
 {
 	optional<EntityDef> eDef;
-	auto begin = std::begin( entityDefs);
-	auto end = std::end( entityDefs);
+	auto begin = std::begin( m_entityDefs);
+	auto end = std::end( m_entityDefs);
 
 	const auto itr = find_if( begin, end, std::move(predicate));
 	if( itr != end)
@@ -232,7 +253,7 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 	m_primaryKeyDef = pk;
 
 	// Update ManyToOne references.
-	for( EntityDef& eDef : entityDefs)
+	for( EntityDef& eDef : m_entityDefs)
 	{
 		if( eDef.mappedType() == EntityDef::MappedType::OneToMany)
 		{
@@ -241,10 +262,31 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 			{
 				Model model = modelFromPrivate( this);
 
-				subModel->addReferenceManyToOne(
+				subModel->setReferenceManyToOne(
 					eDef.propertyName(),
 					model);
 			}
 		}
 	}
+}
+
+const EntityDefList& ModelPrivate::entityDefs() const noexcept
+{ return m_entityDefs; }
+
+void ModelPrivate::setEntityDefs( const EntityDefList& eDefs)
+{
+	m_entityDefs = eDefs;
+	assert( containsDuplicates(m_entityDefs));
+}
+
+void ModelPrivate::pushBackEntityDef( const EntityDef& eDef)
+{
+	m_entityDefs.push_back( eDef);
+	assert( containsDuplicates(m_entityDefs));
+}
+
+void ModelPrivate::pushFrontEntityDef( const EntityDef& eDef)
+{
+	m_entityDefs.insert( begin(m_entityDefs), eDef);
+	assert( containsDuplicates(m_entityDefs));
 }

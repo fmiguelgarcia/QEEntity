@@ -41,9 +41,7 @@ namespace qe { namespace entity {
 
 	using EntityDefList = std::vector<EntityDef>;
 	using EntityDefPredictate = std::function< bool( const EntityDef& )>;
-
-	using RelationDefShd = std::shared_ptr<RelationDef>;
-	using RelationDefList= std::vector<RelationDefShd>;
+	using RelationDefList= std::vector<RelationDef>;
 
 	struct FindEntityDefByPropertyName { const QByteArray name; };
 	struct FindEntityDefByEntityName { const QString name; };

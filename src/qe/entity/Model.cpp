@@ -62,32 +62,20 @@ Model::Model( const QMetaObject* metaObj)
 
 Model::Model(
 	const QString & name,
-	const EntityDefList& entities /*,
-	const Model& refModel*/)
+	const EntityDefList& entities,
+	const EntityDefList& primaryKey)
 	: qe::annotation::Model(
 		QExplicitlySharedDataPointer<ModelPrivate>(
-			new ModelPrivate( name, entities)))
-{
-#if 0
-	addReferenceManyToOne(
-		QString( "%1_fk_%1").arg( name, refModel.name()).toUtf8(),
-		refModel);
-#endif
-}
+			new ModelPrivate( name, entities, primaryKey)))
+{}
 
 bool Model::operator == ( const Model& other) const noexcept
 { return d_ptr == other.d_ptr; }
 
-const QString& Model::name() const noexcept
-{
-	const Q_D(Model);
-	return d->name;
-}
-
 const EntityDefList& Model::entityDefs() const noexcept
 {
 	const Q_D(Model);
-	return d->entityDefs;
+	return d->entityDefs();
 }
 
 const EntityDefList& Model::primaryKeyDef() const noexcept
@@ -96,21 +84,21 @@ const EntityDefList& Model::primaryKeyDef() const noexcept
 	return d->primaryKey();
 }
 
-const RelationDefList & Model::referencesManyToOneDefs() const noexcept
+optional<RelationDef> Model::referenceManyToOne() const noexcept
 {
 	const Q_D(Model);
-	return d->referencesManyToOneDefs;
+	return d->refManyToOne;
 }
 
-void Model::addReferenceManyToOne(
+void Model::setReferenceManyToOne(
 	const QByteArray& propertyName,
 	const Model &reference)
 {
 	Q_D(Model);
-	RelationDefShd fkDef = make_shared<RelationDef>( propertyName, reference);
+	RelationDef fkDef( propertyName, reference);
 
 	// Fix fk column names to avoid duplicates.
-	for( auto & fkColDef: fkDef->relationKey)
+	for( auto fkColDef: fkDef.relationKey())
 	{
 		QString fkColName = fkColDef.entityName();
 		auto colDef = findEntityDef( FindEntityDefByEntityName{ fkColName });
@@ -133,11 +121,30 @@ void Model::addReferenceManyToOne(
 		// Update RelationDef 
 		fkColDef.setEntityName( fkColName);
 		fkColDef.setMappedType( EntityDef::MappedType::ManyToOne);
-		d->entityDefs.push_back( fkColDef);
+		d->pushBackEntityDef( fkColDef);
 	}
 
 	// Copy ref
-	d->referencesManyToOneDefs.push_back( fkDef);
+	d->refManyToOne = fkDef;
+
+	// Update primary key.
+	/// \internal On relations One to many for simple types, the
+	/// auto-generated primary key (index) is not unique, and it represents
+	/// the current position into the list of elements. This case requires
+	/// that foreign key will become part of the key. It also needs to be
+	/// the first part in order to optimise searches.
+
+	if ( d->primaryKey().size() == 1
+		&& ! d->primaryKey().front().isAutoIncrement())
+	{
+		/// \todo Could it be more than one foreign key for Many To One?
+		const auto & relationFk = fkDef.relationKey();
+		auto itr = relationFk.rbegin();
+		while( itr != relationFk.rend())
+		{
+			d->pushFrontEntityDef( *itr++);
+		}
+	}
 }
 
 optional<EntityDef> Model::findEntityDef(const FindEntityDefByPropertyName& property) const noexcept
@@ -167,19 +174,13 @@ optional<EntityDef> Model::findEntityDef(
 	return d->findEntityDef( std::move(predicate));
 }
 
-const RelationDefShd Model::findRelationTo( const Model& model) const noexcept
+optional<RelationDef> Model::findRelationTo( const Model& model) const noexcept
 {
 	const Q_D(Model);
-	RelationDefShd fk;
+	optional<RelationDef> fk;
 
-	const auto itr = find_if( 
-		begin( d->referencesManyToOneDefs),
-		end( d->referencesManyToOneDefs),
-		[model]( const RelationDefShd& fkDef) -> bool
-			{ return fkDef->reference() == model;});
-
-	if( itr != end( d->referencesManyToOneDefs))
-		fk = *itr;
+	if( d->refManyToOne && d->refManyToOne->reference() == model)
+		fk = d->refManyToOne;
 
 	return fk;
 }
