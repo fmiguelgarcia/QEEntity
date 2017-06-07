@@ -45,6 +45,8 @@ namespace qe { namespace entity {
 			const QVariantList& primaryKey() const noexcept;
 			bool isObjectInContext( const QObject* other) const noexcept;
 
+			const QObject* top() const noexcept;
+
 		protected:
 			AbstractS11nContextPrivate* d_ptr;
 			mutable ObjectContext m_context;

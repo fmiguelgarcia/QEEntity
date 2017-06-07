@@ -127,24 +127,22 @@ void Model::setReferenceManyToOne(
 	// Copy ref
 	d->refManyToOne = fkDef;
 
+#if 1
 	// Update primary key.
 	/// \internal On relations One to many for simple types, the
 	/// auto-generated primary key (index) is not unique, and it represents
 	/// the current position into the list of elements. This case requires
 	/// that foreign key will become part of the key. It also needs to be
 	/// the first part in order to optimise searches.
-
-	if ( d->primaryKey().size() == 1
-		&& ! d->primaryKey().front().isAutoIncrement())
+	const EntityDefList& pk = d->primaryKey();
+	if ( pk.size() == 1
+			&& ! pk.front().isAutoIncrement())
 	{
-		/// \todo Could it be more than one foreign key for Many To One?
-		const auto & relationFk = fkDef.relationKey();
-		auto itr = relationFk.rbegin();
-		while( itr != relationFk.rend())
-		{
-			d->pushFrontEntityDef( *itr++);
-		}
+		EntityDefList newPk = fkDef.relationKey();
+		newPk.push_back( pk.front());
+		d->setPrimaryKey( newPk);
 	}
+#endif
 }
 
 optional<EntityDef> Model::findEntityDef(const FindEntityDefByPropertyName& property) const noexcept

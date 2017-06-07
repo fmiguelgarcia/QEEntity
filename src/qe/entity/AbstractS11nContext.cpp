@@ -53,6 +53,14 @@ bool AbstractS11nContext::isObjectInContext( const QObject* other) const noexcep
 	return itr != end( m_context);
 }
 
+const QObject* AbstractS11nContext::top() const noexcept
+{
+	if( Q_LIKELY( !m_context.empty()))
+		return m_context.back();
+
+	return nullptr;
+}
+
 /** \class ScopedS11Context
  * \since 1.0.0
  * \brief It is a helper class to associate object context to an scope.

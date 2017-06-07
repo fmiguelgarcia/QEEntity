@@ -104,11 +104,16 @@ namespace {
 	}
 
 #ifndef NDEBUG
-	template< class C>
-	bool containsDuplicates( C& container)
+	bool containsDuplicates( EntityDefList& container)
 	{
-		sort( begin(container), end(container));
-		return ! is_sorted( begin(container), end(container));
+		const auto lessEntityName = []( const EntityDef& left, const EntityDef& right )
+		{ return left.entityName() < right.entityName(); };
+		const auto equalEntityName = []( const EntityDef& left, const EntityDef& right )
+		{ return left.entityName() == right.entityName(); };
+
+		sort( begin(container), end(container), lessEntityName);
+		return unique( begin(container), end(container), equalEntityName)
+				!= end(container);
 	}
 #endif
 }
@@ -285,8 +290,10 @@ void ModelPrivate::pushBackEntityDef( const EntityDef& eDef)
 	assert( ! containsDuplicates(m_entityDefs));
 }
 
+#if 0
 void ModelPrivate::pushFrontEntityDef( const EntityDef& eDef)
 {
 	m_entityDefs.insert( begin(m_entityDefs), eDef);
 	assert( ! containsDuplicates(m_entityDefs));
 }
+#endif

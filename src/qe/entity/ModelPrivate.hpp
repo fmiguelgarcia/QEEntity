@@ -45,11 +45,11 @@ namespace qe { namespace entity {
 				const EntityDefList& primaryKey);
 
 			const EntityDefList& primaryKey() const noexcept;
+			void setPrimaryKey( const EntityDefList& pk);
 
 			const EntityDefList& entityDefs() const noexcept;
 			void setEntityDefs( const EntityDefList& eDefs);
 			void pushBackEntityDef( const EntityDef& eDef);
-			void pushFrontEntityDef( const EntityDef& eDef);
 
 			void parseAnnotations( const QMetaObject* metaObj);
 
@@ -69,7 +69,6 @@ namespace qe { namespace entity {
 			qe::common::optional<RelationDef> refManyToOne;	///< Many to one defs.
 
 		private:
-			void setPrimaryKey( const EntityDefList& pk);
 			void parseAnnotation(
 				const QMetaObject* metaObj,
 				const QMetaProperty& property);
