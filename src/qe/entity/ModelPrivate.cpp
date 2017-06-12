@@ -257,9 +257,15 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 {
 	m_primaryKeyDef = pk;
 
+	/// @internal Fields of PK cannot be null. These limitation is found
+	/// in several RDBMs.
+	for( EntityDef& eDef : m_primaryKeyDef)
+		eDef.setNullable( false);
+
 	// Update ManyToOne references.
 	for( EntityDef& eDef : m_entityDefs)
 	{
+
 		if( eDef.mappedType() == EntityDef::MappedType::OneToMany)
 		{
 			optional<Model> subModel = eDef.mappedModel();
