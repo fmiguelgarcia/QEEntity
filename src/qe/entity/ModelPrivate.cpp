@@ -49,8 +49,14 @@ namespace {
 	/// @brief It checks if property is register into Qt metatype system.
 	bool isPropertyTypeRegister( const QMetaObject* mo, const QMetaProperty& property)
 	{
-		const int propType = property.userType();
-		const bool isRegistered = QMetaType::isRegistered( propType);
+		int propType = property.userType();
+		bool isRegistered = QMetaType::isRegistered( propType);
+		if( !isRegistered)
+		{
+			const char* typeName = property.typeName();
+			propType = QMetaType::type( typeName);
+			isRegistered = QMetaType::isRegistered( propType);
+		}
 
 		if( propType == QMetaType::Type::UnknownType ||
 			! isRegistered)
