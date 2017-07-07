@@ -66,4 +66,15 @@ namespace qe { namespace entity {
 
 		QString QEENTITY_EXPORT primaryKey() noexcept;
 	}
+
+	class AssociativeTemplateInfo
+	{
+		public:
+			static void registerType( const QMetaType& metaType);
+			static AssociativeTemplateInfo& instance()
+
+		private:
+			AssociativeTemplateInfo();
+			AssociativeTemplateInfo( const AssociativeTemplateInfo& ) = delete;
+	};
 }}

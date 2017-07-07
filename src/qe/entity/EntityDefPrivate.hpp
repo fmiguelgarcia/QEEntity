@@ -42,6 +42,7 @@ namespace qe { namespace entity {
 			void decodeAssociativeContainerRelations( const qe::entity::Model &model);
 
 			bool isSequentialContainer() const noexcept;
+			bool isAssociativeContainer() const noexcept;
 			int getItemType() const noexcept;
 
 		public:

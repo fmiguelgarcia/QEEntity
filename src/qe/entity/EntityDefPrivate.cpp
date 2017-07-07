@@ -250,11 +250,46 @@ void EntityDefPrivate::decodeSequentialContainerRelations(
 }
 
 void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Model &model)
-{ }
+{
+	if( isAssociativeContainer())
+	{
+
+	}
+}
+
+bool EntityDefPrivate::isAssociativeContainer() const noexcept
+{
+	bool isAC = false;
+	if( propertyType < QMetaType::User)
+		return isAC;
+
+	QMetaType mt ( propertyType);
+	bool isRegistered = mt.isRegistered();
+	auto flags = mt.flags();
+	const char * rawTypeName = QMetaType::typeName( propertyType);
+	const QByteArray typeName = QByteArray::fromRawData( rawTypeName, qstrlen(rawTypeName));
+	int templateMarkIdx = typeName.indexOf('<');
+	if( templateMarkIdx != -1)
+	{
+		static std::array<QByteArray,3> associativeContainers = {
+			QByteArrayLiteral( "QHash"),
+			QByteArrayLiteral( "QMap"),
+			QByteArrayLiteral( "std::map")
+		};
+		const QByteArray templateTypeName = QByteArray::fromRawData(
+			rawTypeName, templateMarkIdx);
+		const auto itr = find( begin(associativeContainers), end(associativeContainers), templateTypeName);
+		isAC = ( itr != end(associativeContainers));
+	}
+
+	return isAC;
+}
+
 
 bool EntityDefPrivate::isSequentialContainer() const noexcept
 {
 	bool isSeqContainer;
+
 	switch( propertyType)
 	{
 		case QMetaType::QStringList:
