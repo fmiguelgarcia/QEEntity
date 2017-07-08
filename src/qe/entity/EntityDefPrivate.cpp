@@ -29,6 +29,7 @@
 #include "ModelRepository.hpp"
 #include <qe/common/Exception.hpp>
 #include <qe/entity/Model.hpp>
+#include <qe/entity/AssociativeContainerRegister.hpp>
 #include <QStringBuilder>
 
 using namespace qe::entity;
@@ -253,36 +254,20 @@ void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Mo
 {
 	if( isAssociativeContainer())
 	{
-
+		AssociativeTypeItem ati = AssociativeContainerRegister::instance()
+				.value( propertyType);
+		/// @todo create relation one to many, using integer as pk
+		/// and columns: keyType, valueType
 	}
 }
 
 bool EntityDefPrivate::isAssociativeContainer() const noexcept
 {
-	bool isAC = false;
 	if( propertyType < QMetaType::User)
-		return isAC;
+		return false;
 
-	QMetaType mt ( propertyType);
-	bool isRegistered = mt.isRegistered();
-	auto flags = mt.flags();
-	const char * rawTypeName = QMetaType::typeName( propertyType);
-	const QByteArray typeName = QByteArray::fromRawData( rawTypeName, qstrlen(rawTypeName));
-	int templateMarkIdx = typeName.indexOf('<');
-	if( templateMarkIdx != -1)
-	{
-		static std::array<QByteArray,3> associativeContainers = {
-			QByteArrayLiteral( "QHash"),
-			QByteArrayLiteral( "QMap"),
-			QByteArrayLiteral( "std::map")
-		};
-		const QByteArray templateTypeName = QByteArray::fromRawData(
-			rawTypeName, templateMarkIdx);
-		const auto itr = find( begin(associativeContainers), end(associativeContainers), templateTypeName);
-		isAC = ( itr != end(associativeContainers));
-	}
-
-	return isAC;
+	return AssociativeContainerRegister::instance()
+			.contains( propertyType);
 }
 
 

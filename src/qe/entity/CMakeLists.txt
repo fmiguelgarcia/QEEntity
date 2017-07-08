@@ -11,6 +11,8 @@ set( QEEntity_SRCS
 	AbstractS11nContext.cpp
 	AbstractSerializer.cpp
 	Types.cpp
+	SequenceContainerRegister.cpp
+	AssociativeContainerRegister.cpp
 	EntityDefPrivate.cpp
 	EntityDef.cpp
 	RelationDef.cpp
@@ -27,4 +29,4 @@ set_target_properties( QEEntity PROPERTIES
 	VERSION ${QEEntity_MAYOR_VERSION}.${QEEntity_MINOR_VERSION}.${QEEntity_BUILD_VERSION}
 	SOVERSION ${QEEntity_MAYOR_VERSION})
 target_compile_features( QEEntity 
-	PUBLIC cxx_auto_type cxx_nullptr cxx_lambdas)
+	PUBLIC cxx_auto_type cxx_nullptr cxx_lambdas cxx_uniform_initialization)

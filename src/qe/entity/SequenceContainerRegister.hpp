@@ -12,7 +12,7 @@
  * a written agreement between you and The Dmious Company. For licensing terms
  * and conditions see http://www.dmious.com/qe/terms-conditions. For further
  * information use the contact form at http://www.dmious.com/contact-us.
- * 
+ *
  * GNU Lesser General Public License Usage
  * Alternatively, this file may be used under the terms of the GNU Lesser
  * General Public License version 3 as published by the Free Software
@@ -23,43 +23,37 @@
  *
  * $QE_END_LICENSE$
  */
-#include "Types.hpp"
-#include <mutex>
+#pragma once
+#include <unordered_map>
 
-using namespace qe::common;
+namespace qe { namespace entity {
 
-namespace qe { namespace entity { 
-	namespace tags {
+	struct SequenceContainerItem {
+		const int typeId;
+		const int valueTypeId;
+	};
 
-		QString entityName() noexcept
-		{ return QStringLiteral( "@qe.entity.name");}
+	class SequenceContainerRegister
+	{
+		public:
+			using TypeMap = std::unordered_map<int, SequenceContainerItem>;
+			static SequenceContainerRegister& instance();
 
-		QString isNullable() noexcept
-		{ return QStringLiteral( "@qe.entity.isNullable");}
+			void add(
+					const int typeId,
+					const int valueTypeId);
+			bool contains( const int typeId) const noexcept;
+			SequenceContainerItem value( const int type) const noexcept;
 
-		QString isAutoIncrementable() noexcept
-		{ return QStringLiteral( "@qe.entity.isAutoIncrementable");}
+		private:
+			SequenceContainerRegister();
+			SequenceContainerRegister(
+					const SequenceContainerRegister& ) = delete;
 
-		QString entityMaxLength() noexcept
-		{ return QStringLiteral( "@qe.entity.maxLength");}
+			TypeMap m_types;
+	};
+}}
 
-		QString mappingType() noexcept
-		{ return QStringLiteral( "@qe.entity.mapping.type");}
-
-		QString mappingEntity() noexcept
-		{ return QStringLiteral( "@qe.entity.mapping.entity");}
-
-		QString primaryKey() noexcept
-		{ return QStringLiteral( "@qe.entity.primaryKey");}
-
-		QString isParentExported() noexcept
-		{ return QStringLiteral( "@qe.entity.isParentExported");}
-
-		QString isEnabled() noexcept
-		{ return QStringLiteral( "@qe.entity.isEnabled");}
-
-		QString modelName() noexcept
-		{ return QStringLiteral( "@qe.model.name");}
-
-}}}
-
+#define QE_DEFINE_SEQUENCE_CONTAINER( type, valueType) \
+	qe::entity::SequenceContainerRegister::instance() \
+		.add( type, keyType, valueType);
