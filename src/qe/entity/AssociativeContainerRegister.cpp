@@ -5,6 +5,10 @@
 using namespace qe::entity;
 using namespace std;
 
+QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantMap, QMetaType::QString, QMetaType::QVariant)
+QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantHash, QMetaType::QString, QMetaType::QVariant)
+QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QJsonObject, QMetaType::QString, QMetaType::QJsonValue)
+
 AssociativeContainerRegister::AssociativeContainerRegister()
 {}
 
@@ -19,28 +23,33 @@ AssociativeContainerRegister & AssociativeContainerRegister::instance()
 	return *instance.get();
 }
 
-void AssociativeContainerRegister::add(
-		const int associativeTypeId,
+int AssociativeContainerRegister::add(
+		const int containerTypeId,
 		const int keyTypeId,
 		const int valueTypeId)
 {
 	m_types.emplace(
-		associativeTypeId,
-		AssociativeTypeItem{
-			associativeTypeId,
+		containerTypeId,
+		AssociativeContainerInfo{
+			containerTypeId,
 			keyTypeId,
 			valueTypeId
 		});
+
+	return containerTypeId;
 }
 
-bool AssociativeContainerRegister::contains( const int typeId) const noexcept
-{ return m_types.find( typeId) != end(m_types);}
+bool AssociativeContainerRegister::contains(
+		const int containerTypeId) const noexcept
+{ return m_types.find( containerTypeId) != end(m_types);}
 
-AssociativeTypeItem AssociativeContainerRegister::value( const int type) const noexcept
+AssociativeContainerInfo AssociativeContainerRegister::value(
+		const int containerTypeId) const noexcept
 {
-	const auto itr = m_types.find( type);
-	if( itr != end( m_types))
+	const auto itr = m_types.find( containerTypeId);
+	if( Q_LIKELY( itr != end( m_types)))
 		return itr->second;
+
 	return {0,0,0};
 }
 

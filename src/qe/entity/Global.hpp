@@ -32,6 +32,10 @@
 #  define QEENTITY_EXPORT Q_DECL_IMPORT
 #endif
 
+#define QE_ENTITY_CONCAT_(a, b) a##b
+#define QE_ENTITY_CONCAT(a, b) QE_ENTITY_CONCAT_(a, b)
+#define QE_ENTITY_UNIQUE_NAME(base) QE_ENTITY_CONCAT( base, __COUNTER__)
+
 #include <QMetaType>
 #include <memory>
 #include <deque>

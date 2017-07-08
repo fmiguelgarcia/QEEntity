@@ -24,26 +24,28 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <unordered_map>
 
 namespace qe { namespace entity {
 
-	struct SequenceContainerItem {
-		const int typeId;
-		const int valueTypeId;
+	/// @brief Sequence container information.
+	struct SequenceContainerInfo
+	{
+		const int containerTypeId;		///< Container type ID.
+		const int elementTypeId;			///< Element type ID.
 	};
 
-	class SequenceContainerRegister
+	/// @brief It registers information about sequence containers.
+	class QEENTITY_EXPORT SequenceContainerRegister
 	{
 		public:
-			using TypeMap = std::unordered_map<int, SequenceContainerItem>;
+			using TypeMap = std::unordered_map<int, SequenceContainerInfo>;
 			static SequenceContainerRegister& instance();
 
-			void add(
-					const int typeId,
-					const int valueTypeId);
-			bool contains( const int typeId) const noexcept;
-			SequenceContainerItem value( const int type) const noexcept;
+			bool contains( const int containerTypeId) const noexcept;
+			SequenceContainerInfo value( const int containerTypeId) const noexcept;
+			int add( const int containerTypeId, const int elementTypeId);
 
 		private:
 			SequenceContainerRegister();
@@ -54,6 +56,13 @@ namespace qe { namespace entity {
 	};
 }}
 
-#define QE_DEFINE_SEQUENCE_CONTAINER( type, valueType) \
-	qe::entity::SequenceContainerRegister::instance() \
-		.add( type, keyType, valueType);
+/// @brief This macro helps to register sequence container information in
+/// unit initialization.
+/// It creates a unique static int variable, which will store the return value
+/// of @c SequenceContainerRegister registration.
+#define QE_REGISTER_SEQUENCE_CONTAINER(CONTAINER_TYPE_ID, ELEMENT_TYPE_ID)	\
+	namespace { \
+		const int QE_ENTITY_UNIQUE_NAME(QE_SEC_) = \
+			qe::entity::SequenceContainerRegister::instance() \
+				.add( CONTAINER_TYPE_ID, ELEMENT_TYPE_ID); \
+	}

@@ -254,7 +254,7 @@ void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Mo
 {
 	if( isAssociativeContainer())
 	{
-		AssociativeTypeItem ati = AssociativeContainerRegister::instance()
+		AssociativeContainerInfo aci = AssociativeContainerRegister::instance()
 				.value( propertyType);
 		/// @todo create relation one to many, using integer as pk
 		/// and columns: keyType, valueType

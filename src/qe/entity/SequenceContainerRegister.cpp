@@ -5,6 +5,20 @@
 using namespace qe::entity;
 using namespace std;
 
+/// @class qe::entity::SequenceContainerRegister
+///
+/// This library also register common QT sequence containers:
+/// 	- QStringList
+/// 	- QByteArrayList
+/// 	- QJsonArray
+/// 	- QVariantList
+/// 	.
+
+QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QStringList, QMetaType::QString)
+QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QByteArrayList, QMetaType::QByteArray)
+QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QJsonArray, QMetaType::QJsonValue)
+QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QVariantList, QMetaType::QVariant)
+
 SequenceContainerRegister::SequenceContainerRegister()
 {}
 
@@ -19,22 +33,25 @@ SequenceContainerRegister& SequenceContainerRegister::instance()
 	return *instance.get();
 }
 
-void SequenceContainerRegister::add(
-		const int typeId,
-		const int valueTypeId)
+int SequenceContainerRegister::add(
+		const int containerTypeId,
+		const int elementTypeId)
 {
 	m_types.emplace(
-		typeId,
-		SequenceContainerItem{ typeId, valueTypeId });
+		containerTypeId,
+		SequenceContainerInfo{ containerTypeId, elementTypeId });
+
+	return containerTypeId;
 }
 
-bool SequenceContainerRegister::contains( const int typeId) const noexcept
-{ return m_types.find( typeId) != end(m_types);}
+bool SequenceContainerRegister::contains(const int containerTypeId) const noexcept
+{ return m_types.find( containerTypeId) != end(m_types);}
 
-SequenceContainerItem SequenceContainerRegister::value( const int type) const noexcept
+SequenceContainerInfo SequenceContainerRegister::value(const int containerTypeId) const noexcept
 {
-	const auto itr = m_types.find( type);
-	if( itr != end( m_types))
+	const auto itr = m_types.find( containerTypeId);
+	if( Q_LIKELY(itr != end( m_types)))
 		return itr->second;
+
 	return {0,0};
 }

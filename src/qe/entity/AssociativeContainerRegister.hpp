@@ -24,29 +24,32 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/Global.hpp>
 #include <unordered_map>
 
 namespace qe { namespace entity {
 
-	struct AssociativeTypeItem
+	/// @brief Associative container information.
+	struct AssociativeContainerInfo
 	{
-		const int typeId;
-		const int keyTypeId;
-		const int valueTypeId;
+		const int containerTypeId;		///< Container type ID.
+		const int keyTypeId;				///< Key type ID.
+		const int valueTypeId;			///< Value type ID.
 	};
 
 	class AssociativeContainerRegister
 	{
 		public:
-			using TypeMap = std::unordered_map<int, AssociativeTypeItem>;
+			using TypeMap = std::unordered_map<int, AssociativeContainerInfo>;
 			static AssociativeContainerRegister& instance();
 
-			void add(
-					const int associativeTypeId,
+			bool contains( const int containerTypeId) const noexcept;
+			AssociativeContainerInfo value( const int containerTypeId) const noexcept;
+
+			int add(
+					const int containerTypeId,
 					const int keyTypeId,
 					const int valueTypeId);
-			bool contains( const int typeId) const noexcept;
-			AssociativeTypeItem value( const int type) const noexcept;
 
 		private:
 			AssociativeContainerRegister();
@@ -56,8 +59,9 @@ namespace qe { namespace entity {
 	};
 }}
 
-#define QE_DEFINE_ASSOCIATIVE_CONTAINER( type, keyType, valueType) \
-	qe::entity::AssociativeContainerRegister::instance().add( \
-		type, \
-		keyType, \
-		valueType);
+#define QE_REGISTER_ASSOCIATIVE_CONTAINER( CONTAINER_TYPE_ID, KEY_TYPE_ID, VALUE_TYPE_ID) \
+	namespace { \
+		const int QE_ENTITY_UNIQUE_NAME(QE_ASSOC_) = \
+			qe::entity::AssociativeContainerRegister::instance() \
+				.add( CONTAINER_TYPE_ID, KEY_TYPE_ID, VALUE_TYPE_ID); \
+	}
