@@ -25,9 +25,11 @@
  */
 #pragma once
 #include <qe/entity/Global.hpp>
+#include <QLoggingCategory>
 #include <unordered_map>
 
 namespace qe { namespace entity {
+	Q_DECLARE_LOGGING_CATEGORY( lcAssociativeContainerRegister);
 
 	/// @brief Associative container information.
 	struct AssociativeContainerInfo

@@ -24,6 +24,7 @@
  * $QE_END_LICENSE$
  */
 #include "Model.hpp"
+#include "ModelRepository.hpp"
 #include "ModelPrivate.hpp"
 #include "EntityDef.hpp"
 #include "RelationDef.hpp"
@@ -67,7 +68,9 @@ Model::Model(
 	: qe::annotation::Model(
 		QExplicitlySharedDataPointer<ModelPrivate>(
 			new ModelPrivate( name, entities, primaryKey)))
-{}
+{
+	ModelRepository::instance().registerModel( *this);
+}
 
 bool Model::operator == ( const Model& other) const noexcept
 { return d_ptr == other.d_ptr; }

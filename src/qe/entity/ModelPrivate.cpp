@@ -203,9 +203,13 @@ void ModelPrivate::parseAnnotation(
 			}
 			else
 			{
+				int type = property.type();
+				if( type == QVariant::UserType)
+					type = property.userType();
+
 				const EntityDef eDef (
 					propertyName,
-					property.type(),
+					type,
 					0,
 					model);
 				pushBackEntityDef( eDef);

@@ -9,6 +9,10 @@ QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantMap, QMetaType::QString, Q
 QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantHash, QMetaType::QString, QMetaType::QVariant)
 QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QJsonObject, QMetaType::QString, QMetaType::QJsonValue)
 
+Q_LOGGING_CATEGORY(
+	qe::entity::lcAssociativeContainerRegister,
+	"com.dmious.qe.entity.associativeContainerRegister");
+
 AssociativeContainerRegister::AssociativeContainerRegister()
 {}
 
@@ -28,6 +32,10 @@ int AssociativeContainerRegister::add(
 		const int keyTypeId,
 		const int valueTypeId)
 {
+	qCDebug( lcAssociativeContainerRegister,
+			"Add associative container: %d key: %d value: %d",
+			containerTypeId, keyTypeId, valueTypeId);
+
 	m_types.emplace(
 		containerTypeId,
 		AssociativeContainerInfo{
@@ -52,4 +60,3 @@ AssociativeContainerInfo AssociativeContainerRegister::value(
 
 	return {0,0,0};
 }
-

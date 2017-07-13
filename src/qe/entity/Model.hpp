@@ -26,7 +26,7 @@
 #pragma once
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
-#include <qe/common/Common.hpp>
+#include <qe/common/Optional.hpp>
 #include <qe/annotation/Model.hpp>
 #include <QLoggingCategory>
 #include <functional>

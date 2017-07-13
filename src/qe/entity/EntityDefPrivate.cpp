@@ -30,6 +30,7 @@
 #include <qe/common/Exception.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/AssociativeContainerRegister.hpp>
+#include <qe/entity/SequenceContainerRegister.hpp>
 #include <QStringBuilder>
 
 using namespace qe::entity;
@@ -99,21 +100,10 @@ namespace {
 		return mappedType;
 	}
 
-	Model createOneToManyForSimpleTypes(
-		const QString& modelName,
-		const QByteArray& propertyName,
-		const QVariant::Type type,
-		const Model& refModel)
+	template< class T>
+	QByteArray addPostfix( QByteArray v, T suffix )
 	{
-		EntityDef value( propertyName, type);
-		EntityDef key( "idx", QVariant::Type::Int);
-
-		Model m (
-			modelName,
-			EntityDefList{ key, value},
-			EntityDefList{ key});
-
-		return m;
+		return v.append( suffix);
 	}
 
 }
@@ -238,15 +228,21 @@ void EntityDefPrivate::decodeSequentialContainerRelations(
 {
 	if( isSequentialContainer())
 	{
-		const QString modelName = model.name() % "_" % propertyName;
-		int itemType = getItemType();
+		const QString modelName = model.name() % "_seq_" % propertyName;
+		const auto seqContainerInfo = SequenceContainerRegister::instance()
+				.value( propertyType);
+
+		EntityDef value { propertyName, seqContainerInfo.elementTypeId};
+		EntityDef key {
+				addPostfix( propertyName, "_idx"),
+				QVariant::Type::Int};
 
 		mappedType = EntityDef::MappedType::OneToMany;
-		mappedModel = createOneToManyForSimpleTypes(
-				modelName,
-				propertyName,
-				static_cast<QVariant::Type>( itemType),
-				model);
+		mappedModel = Model {
+			modelName,
+			EntityDefList{ key, value},
+			EntityDefList{ key} };
+		mappedModel->setReferenceManyToOne( propertyName, model);
 	}
 }
 
@@ -254,10 +250,26 @@ void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Mo
 {
 	if( isAssociativeContainer())
 	{
+		const QString modelName = model.name() % "_assoc_" % propertyName;
 		AssociativeContainerInfo aci = AssociativeContainerRegister::instance()
 				.value( propertyType);
-		/// @todo create relation one to many, using integer as pk
-		/// and columns: keyType, valueType
+
+		EntityDef assocKey {
+				addPostfix( propertyName, "_key"),
+				aci.keyTypeId};
+		EntityDef assocVal {
+				addPostfix( propertyName, "_value"),
+				aci.valueTypeId};
+		EntityDef key {
+				addPostfix( propertyName, "_idx"),
+				QVariant::Type::Int};
+
+		mappedType = EntityDef::MappedType::OneToMany;
+		mappedModel = Model {
+				modelName,
+				EntityDefList{ key, assocKey, assocVal},
+				EntityDefList{ key}};
+		mappedModel->setReferenceManyToOne( propertyName, model);
 	}
 }
 
@@ -273,34 +285,6 @@ bool EntityDefPrivate::isAssociativeContainer() const noexcept
 
 bool EntityDefPrivate::isSequentialContainer() const noexcept
 {
-	bool isSeqContainer;
-
-	switch( propertyType)
-	{
-		case QMetaType::QStringList:
-		case QMetaType::QByteArrayList:
-		case QMetaType::QJsonArray:
-			isSeqContainer = true;
-			break;
-		default:
-			isSeqContainer = false;
-	}
-
-	return isSeqContainer;
+	return SequenceContainerRegister::instance()
+			.contains( propertyType);
 }
-
-int EntityDefPrivate::getItemType() const noexcept
-{
-	switch( propertyType)
-	{
-		case QMetaType::QByteArrayList:
-			return QMetaType::QByteArray;
-		case QMetaType::QJsonArray:
-			return QMetaType::QJsonValue;
-		case QMetaType::QVariantList:
-		case QMetaType::QStringList:
-		default:
-			return QMetaType::QString;
-	}
-}
-

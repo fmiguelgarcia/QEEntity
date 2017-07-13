@@ -25,30 +25,40 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/common/Optional.hpp>
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Types.hpp>
 #include <QMetaObject>
-#include <map>
+#include <QHash>
 #include <mutex>
 
 namespace qe { namespace entity {
 
     class QEENTITY_EXPORT ModelRepository
 	{
+		friend class Model;
 		public:
 			static ModelRepository& instance();
 
 			/// @brief It gets the Orm model associated to @p metaObject.
 			Model model( const QMetaObject *metaObject) const;
 
+			qe::common::optional<Model>
+			model( const QString& name) const;
+
 		private:
 			ModelRepository();
 			ModelRepository( const ModelRepository&) = delete;
 		
 			Model makeModel( const QMetaObject* metaObj) const;
+			void registerModel( const Model& model) const;
 
 		private:
+			using ModelByMetaObject = QHash<const QMetaObject*, Model>;
+			using ModelByName = QHash<QString, Model>;
+
 			mutable std::recursive_mutex m_modelsMtx;
-			mutable std::map<const QMetaObject*, Model> m_models;
+			mutable ModelByMetaObject m_modelByMO;
+			mutable ModelByName m_modelByName;
 	};
 }}

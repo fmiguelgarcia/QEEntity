@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QMap>
 #include "entity/chapter.hpp"
 #include <qe/entity/OneToManyAdapter.hpp>
 #include <vector>
@@ -17,8 +18,10 @@ class Book
 	Q_PROPERTY( int entityDisable MEMBER entityDisable )
 	Q_PROPERTY( QStringList footNotes MEMBER footNotes)
 
-	Q_PROPERTY( QVariantList chapters READ chaptersAdapter WRITE chaptersAdapter)
+	// Q_PROPERTY( QVariantList chapters READ chaptersAdapter WRITE chaptersAdapter)
+	Q_PROPERTY( std::vector<Chapter> chapters MEMBER chapters)
 	// Q_PROPERTY( QList<qe::entity::OneToManySimpleTypeAdapter> footNotes READ footNotesAdapter WRITE footNotesAdapter)
+	Q_PROPERTY( Book::ReferencesExt references MEMBER references)
 
 	// Annotations
 	Q_CLASSINFO( "class", "@qe.model.name=book")
@@ -31,6 +34,8 @@ class Book
 	// Q_CLASSINFO( "footNotes", "@qe.entity.mapping.type=OneToMany")
 
 	public:
+		using ReferencesExt = QMap<QString, QString>;
+
 		int id;
 		QString title;
 		QString author;
@@ -40,7 +45,14 @@ class Book
 		QStringList footNotes;
 
 		std::vector<Chapter> chapters;
+		ReferencesExt references;
 
-		qe::entity::OneToManyAdapter< decltype(chapters)> chaptersAdapter{ chapters};
-		qe::entity::OneToManySimpleAdapter< decltype(footNotes)> footNotesAdapter { footNotes };
+		Book() = default;
+		Book( const Book& );
+		// qe::entity::OneToManyAdapter< decltype(chapters)> chaptersAdapter{ chapters};
+		// qe::entity::OneToManySimpleAdapter< decltype(footNotes)> footNotesAdapter { footNotes };
 };
+
+Q_DECLARE_METATYPE( Book)
+Q_DECLARE_METATYPE( std::vector<Chapter>)
+Q_DECLARE_METATYPE( Book::ReferencesExt)

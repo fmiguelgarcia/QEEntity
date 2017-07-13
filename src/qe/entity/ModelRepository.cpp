@@ -35,9 +35,9 @@ namespace {
 	
 	/// @brief Utility to use double check locking and create/insert objects
 	/// into a map if they do NOT exist previously.
-	template <typename V,  typename K, typename M, typename F>
-		V findOrCreateUsingDoubleCheckLocking( 
-				std::map<K,V>& container, K& key, M& mutex, 
+	template <typename C, typename K, typename M, typename F>
+		typename C::mapped_type findOrCreateUsingDoubleCheckLocking(
+				C& container, K& key, M& mutex,
 				const F& createFunc)
 		{
 			auto itr = container.find( key);
@@ -47,12 +47,11 @@ namespace {
 				itr = container.find( key);
 				if( itr == std::end( container))
 				{
-					V value = createFunc(); 
-					itr = container.insert(
-							std::make_pair( key, value) ).first;
+					const auto value = createFunc();
+					itr = container.insert( key, value);
 				}
 			}
-			return itr->second;
+			return itr.value();
 		}
 }
 
@@ -72,30 +71,31 @@ ModelRepository::ModelRepository() = default;
 Model ModelRepository::model( const QMetaObject *metaObject) const
 {
 	return findOrCreateUsingDoubleCheckLocking( 
-		m_models, metaObject, m_modelsMtx, 
+		m_modelByMO, metaObject, m_modelsMtx,
 		[this,metaObject](){ return makeModel( metaObject);});
+}
+
+qe::common::optional<Model> ModelRepository::model(const QString& name) const
+{
+	qe::common::optional<Model> model;
+
+	const auto itr = m_modelByName.find( name);
+	if( itr != end( m_modelByName))
+		model = itr.value();
+
+	return model;
 }
 
 Model ModelRepository::makeModel( const QMetaObject* metaObj) const
 { 
 	Model lmodel( metaObj);
-
-#if 0
-	// Relation one to many
-	for( const auto& eDef: lmodel.entityDefs())
-	{
-		const auto mappingType = eDef.mappedType();
-		if( mappingType == EntityDef::MappedType::OneToMany)
-		{
-			auto mo = eDef.mappedModel();
-			if( mo )
-				mo->addReferenceManyToOne(
-					eDef.propertyName(),
-					lmodel);
-		}
-	}
-#endif
-
+	registerModel( lmodel);
 	return lmodel;
+}
+
+void ModelRepository::registerModel( const Model& model) const
+{
+	std::lock_guard<std::recursive_mutex> _( m_modelsMtx);
+	m_modelByName.insert( model.name(), model);
 }
 

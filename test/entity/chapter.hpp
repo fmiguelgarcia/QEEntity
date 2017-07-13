@@ -18,9 +18,13 @@ class Chapter
 		Chapter( Chapter&& other) noexcept;
 		Chapter( const Chapter& other) noexcept;
 
+		Chapter& operator=( const Chapter& other);
+		bool operator==( const Chapter& other) const noexcept;
+
 	public:
 		int id;
 		QString title;
 		QString text;
 };
 Q_DECLARE_METATYPE( Chapter*)
+Q_DECLARE_METATYPE( Chapter)

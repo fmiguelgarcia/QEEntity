@@ -62,7 +62,11 @@ void QEEntityTest::checkEntityPrimaryKey()
 
 void QEEntityTest::checkEntityReferenceOneToMany()
 {
-	const auto relationManyToOne = m_chapterModel->referenceManyToOne();
+	const auto bookChapterModel =
+		ModelRepository::instance().model( "book_seq_chapters");
+	QVERIFY( bookChapterModel);
+
+	const auto relationManyToOne = bookChapterModel->referenceManyToOne();
 	QVERIFY( relationManyToOne);
 
 	for( const auto& eDef: relationManyToOne->relationKey())
@@ -82,8 +86,14 @@ void QEEntityTest::checkEntityMappingEntity()
 		FindEntityDefByPropertyName { "chapters"});
 	QVERIFY( eDef 
 			&& eDef->mappedType() == EntityDef::MappedType::OneToMany
-			&& eDef->mappedModel()
-			&& QStringLiteral("Chapter") == eDef->mappedModel()->name());
+			&& eDef->mappedModel() );
+
+	eDef = m_bookModel->findEntityDef(
+		FindEntityDefByPropertyName { "references" });
+	QVERIFY( eDef
+			&& eDef->mappedType() == EntityDef::MappedType::OneToMany);
+	auto eDefModel = eDef->mappedModel();
+	QVERIFY( eDefModel && !eDefModel->name().isEmpty());
 
 	eDef = m_bookModel->findEntityDef(
 		FindEntityDefByPropertyName{ "title"});

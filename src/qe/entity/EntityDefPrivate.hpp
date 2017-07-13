@@ -43,7 +43,6 @@ namespace qe { namespace entity {
 
 			bool isSequentialContainer() const noexcept;
 			bool isAssociativeContainer() const noexcept;
-			int getItemType() const noexcept;
 
 		public:
 			EntityDefPrivate(

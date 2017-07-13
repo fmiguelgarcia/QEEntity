@@ -13,4 +13,4 @@ target_link_libraries( QEEntityTest
 	${CONAN_LIBS})
 
 # Add test
-add_test( NAME QEEntityTest  COMMAND $<TARGET_FILE:QEEntityTest>)
+add_test( NAME QEEntityTest  COMMAND QEEntityTest)
