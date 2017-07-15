@@ -61,7 +61,17 @@ namespace qe { namespace entity {
 	};
 }}
 
-#define QE_REGISTER_ASSOCIATIVE_CONTAINER( CONTAINER_TYPE_ID, KEY_TYPE_ID, VALUE_TYPE_ID) \
+#define QE_REGISTER_ASSOCIATIVE_CONTAINER( CONTAINER_TYPE, KEY_TYPE, VALUE_TYPE) \
+	namespace { \
+		const int QE_ENTITY_UNIQUE_NAME(QE_ASSOC_) = \
+			qe::entity::AssociativeContainerRegister::instance() \
+				.add( \
+						qRegisterMetaType< CONTAINER_TYPE >(), \
+					  	qRegisterMetaType< KEY_TYPE >(), \
+						qRegisterMetaType< VALUE_TYPE >()); \
+	}
+
+#define QE_REGISTER_ASSOCIATIVE_CONTAINER_ID( CONTAINER_TYPE_ID, KEY_TYPE_ID, VALUE_TYPE_ID) \
 	namespace { \
 		const int QE_ENTITY_UNIQUE_NAME(QE_ASSOC_) = \
 			qe::entity::AssociativeContainerRegister::instance() \

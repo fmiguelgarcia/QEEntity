@@ -60,9 +60,22 @@ namespace qe { namespace entity {
 /// unit initialization.
 /// It creates a unique static int variable, which will store the return value
 /// of @c SequenceContainerRegister registration.
-#define QE_REGISTER_SEQUENCE_CONTAINER(CONTAINER_TYPE_ID, ELEMENT_TYPE_ID)	\
+#define QE_REGISTER_SEQUENCE_CONTAINER(CONTAINER_TYPE, ELEMENT_TYPE)	\
+	namespace { \
+		const int QE_ENTITY_UNIQUE_NAME(QE_SEC_) = \
+			qe::entity::SequenceContainerRegister::instance() \
+				.add( \
+					qRegisterMetaType< CONTAINER_TYPE >(), \
+					qRegisterMetaType< ELEMENT_TYPE >()); \
+	}
+
+/// @brief It is the same as QE_REGISTER_SEQUENCE_CONTAINER but using 
+/// type ID (number or QMetaType::Type enum). 
+#define QE_REGISTER_SEQUENCE_CONTAINER_ID(CONTAINER_TYPE_ID, ELEMENT_TYPE_ID)	\
 	namespace { \
 		const int QE_ENTITY_UNIQUE_NAME(QE_SEC_) = \
 			qe::entity::SequenceContainerRegister::instance() \
 				.add( CONTAINER_TYPE_ID, ELEMENT_TYPE_ID); \
 	}
+
+

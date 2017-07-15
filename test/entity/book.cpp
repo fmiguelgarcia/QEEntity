@@ -6,20 +6,16 @@ using namespace qe::entity;
 
 namespace {
 	const int bookTypeId = qRegisterMetaType<Book>();
-	const int chaptersTypeId = qRegisterMetaType< std::vector<Chapter> >();
-	const int chapterTypeId = qRegisterMetaType<Chapter>();
-	const int bookReferencesExtTypeId = qRegisterMetaType< Book::ReferencesExt>();
-	const int x = 0;
 }
 
 QE_REGISTER_SEQUENCE_CONTAINER(
-	QMetaType::type( "std::vector<Chapter>"),
-	QMetaType::type( "Chapter"))
+	std::vector<Chapter>,
+	Chapter)
 
 QE_REGISTER_ASSOCIATIVE_CONTAINER(
-	QMetaType::type( "Book::ReferencesExt"),
-	QMetaType::type( "QString"),
-	QMetaType::type( "QString"))
+	Book::ReferencesExt,
+	QString,
+	QString)
 
 Book::Book( const Book& other)
 	: id( other.id),

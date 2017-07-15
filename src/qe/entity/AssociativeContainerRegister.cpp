@@ -5,9 +5,9 @@
 using namespace qe::entity;
 using namespace std;
 
-QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantMap, QMetaType::QString, QMetaType::QVariant)
-QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QVariantHash, QMetaType::QString, QMetaType::QVariant)
-QE_REGISTER_ASSOCIATIVE_CONTAINER( QMetaType::QJsonObject, QMetaType::QString, QMetaType::QJsonValue)
+QE_REGISTER_ASSOCIATIVE_CONTAINER_ID( QMetaType::QVariantMap, QMetaType::QString, QMetaType::QVariant)
+QE_REGISTER_ASSOCIATIVE_CONTAINER_ID( QMetaType::QVariantHash, QMetaType::QString, QMetaType::QVariant)
+QE_REGISTER_ASSOCIATIVE_CONTAINER_ID( QMetaType::QJsonObject, QMetaType::QString, QMetaType::QJsonValue)
 
 Q_LOGGING_CATEGORY(
 	qe::entity::lcAssociativeContainerRegister,

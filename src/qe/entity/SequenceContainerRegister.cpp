@@ -14,10 +14,10 @@ using namespace std;
 /// 	- QVariantList
 /// 	.
 
-QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QStringList, QMetaType::QString)
-QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QByteArrayList, QMetaType::QByteArray)
-QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QJsonArray, QMetaType::QJsonValue)
-QE_REGISTER_SEQUENCE_CONTAINER( QMetaType::QVariantList, QMetaType::QVariant)
+QE_REGISTER_SEQUENCE_CONTAINER_ID( QMetaType::QStringList, QMetaType::QString)
+QE_REGISTER_SEQUENCE_CONTAINER_ID( QMetaType::QByteArrayList, QMetaType::QByteArray)
+QE_REGISTER_SEQUENCE_CONTAINER_ID( QMetaType::QJsonArray, QMetaType::QJsonValue)
+QE_REGISTER_SEQUENCE_CONTAINER_ID( QMetaType::QVariantList, QMetaType::QVariant)
 
 SequenceContainerRegister::SequenceContainerRegister()
 {}
