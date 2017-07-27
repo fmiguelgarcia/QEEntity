@@ -45,6 +45,7 @@ namespace qe { namespace entity {
 	/// column
     class QEENTITY_EXPORT EntityDef
 	{
+		friend class boost::serialization::access;
 		friend class EntityDefPrivate;
 		Q_GADGET
 		public:
@@ -107,6 +108,12 @@ namespace qe { namespace entity {
 			qe::common::optional<QMetaEnum> enumerator() const noexcept;
 
 			void detach();
+
+			template< class Archive>
+			void serialize( Archive & ar, const unsigned int)
+			{
+				ar & BOOST_SERIALIZATION_NVP( d_ptr);
+			}
 
 		protected:
 			EntityDef();

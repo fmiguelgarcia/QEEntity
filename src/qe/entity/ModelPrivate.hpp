@@ -30,15 +30,18 @@
 #include <qe/entity/RelationDef.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/Types.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/nvp.hpp>
 
 class QMetaProperty;
 namespace qe { namespace entity {
 
 	class ModelPrivate : public qe::annotation::ModelPrivate
 	{
+		friend class boost::serialization::access;
 		public:
 			explicit ModelPrivate(
-				const QMetaObject* meta);
+				const QMetaObject* meta = nullptr);
 			ModelPrivate (
 				const QString & name,
 				const EntityDefList& entities,
@@ -64,6 +67,17 @@ namespace qe { namespace entity {
 
 			qe::common::optional<EntityDef> findEntityDef(
 				const FindEntityDefByEntityName& entity) const noexcept;
+
+			template< class Archive>
+			void serialize( Archive& ar, const unsigned int )
+			{
+				using namespace boost::serialization;
+
+				ar & base_object<qe::annotation::ModelPrivate>( *this);
+				ar & make_nvp( "primaryKey", m_primaryKeyDef);
+				ar & make_nvp( "entities", m_entityDefs);
+				ar & make_nvp( "manyToOneRelation", refManyToOne);
+			}
 
 		public:
 			qe::common::optional<RelationDef> refManyToOne;	///< Many to one defs.

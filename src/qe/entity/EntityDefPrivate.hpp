@@ -34,7 +34,11 @@ namespace qe { namespace entity {
 	class Model;
 	class EntityDefPrivate : public QSharedData
 	{
+		friend class boost::serialization::access;
 		private:
+			/// @note Only used by Serialization
+			EntityDefPrivate();
+
 			void decodeProperties(const qe::entity::Model &model);
 			void decodeOneToManyAnnotatedRelations( const qe::entity::Model &model);
 			void decodePointerRelations( const qe::entity::Model &model);
@@ -56,13 +60,30 @@ namespace qe { namespace entity {
 				const QMetaEnum metaEnum,
 				const qe::common::optional<qe::entity::Model>& model);
 
+			template< class Archive>
+			void serialize( Archive & ar, const unsigned int )
+			{
+				ar & BOOST_SERIALIZATION_NVP( entityName);
+				ar & BOOST_SERIALIZATION_NVP( defaultValue);
+				ar & BOOST_SERIALIZATION_NVP( propertyName);
+				ar & BOOST_SERIALIZATION_NVP( propertyType);
+				ar & BOOST_SERIALIZATION_NVP( maxLength);
+				ar & BOOST_SERIALIZATION_NVP( isAutoIncrement);
+				ar & BOOST_SERIALIZATION_NVP( isNullable);
+
+				ar & BOOST_SERIALIZATION_NVP( mappedType);
+				ar & BOOST_SERIALIZATION_NVP( mappedFetch);
+				ar & BOOST_SERIALIZATION_NVP( mappedModel);
+				ar & BOOST_SERIALIZATION_NVP( metaEnum);
+			}
+
 		public:
 			QString entityName;					///< Entity name
 			QVariant defaultValue;				///< Default value.
 
 			// Property link
-			const QByteArray propertyName;		///< Property name.
-			const int propertyType;				///< Property type.
+			QByteArray propertyName;		///< Property name.
+			int propertyType;				///< Property type.
 
 			// Mapped Type
 			int mappedType;

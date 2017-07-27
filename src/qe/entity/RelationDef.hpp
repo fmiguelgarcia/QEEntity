@@ -26,6 +26,7 @@
 #pragma once
 #include <qe/entity/Global.hpp>
 #include <qe/entity/Model.hpp>
+#include <boost/serialization/nvp.hpp>
 
 namespace qe { namespace entity { 
 	class RelationDefPrivate;
@@ -33,6 +34,7 @@ namespace qe { namespace entity {
 	/// @brief Foreign key definition.
 	class QEENTITY_EXPORT RelationDef
 	{
+		friend class boost::serialization::access;
 		public:
 			/// @brief Constructor.
 			/// @param propertyName Property name.
@@ -51,10 +53,23 @@ namespace qe { namespace entity {
 			const Model& reference() const noexcept;
 
 			const EntityDefList& relationKey() const noexcept;
+
+			template< class Archive>
+			void serialize( Archive& ar, const unsigned int )
+			{
+				// ar & BOOST_SERIALIZATION_NVP( d_ptr);
+				ar & boost::serialization::make_nvp( "propertyName", m_propertyName);
+				ar & boost::serialization::make_nvp( "reference", m_reference);
+				ar & boost::serialization::make_nvp( "relationKey", m_relationKey);
+			}
+
 		protected:
 			RelationDefPrivate* d_ptr;
 
 		private:
+			/// @note Used only by serialization
+			RelationDef();
+
 			QByteArray m_propertyName;
 			Model m_reference;
 			EntityDefList m_relationKey;

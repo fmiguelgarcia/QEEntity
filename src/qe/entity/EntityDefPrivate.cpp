@@ -27,11 +27,22 @@
 
 #include "EntityDefPrivate.hpp"
 #include "ModelRepository.hpp"
+
 #include <qe/common/Exception.hpp>
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
+#include <qe/common/serialization/QByteArray.hpp>
+#include <qe/common/serialization/QMetaEnum.hpp>
+
+#include <qe/annotation/ModelPrivate.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/AssociativeContainerRegister.hpp>
 #include <qe/entity/SequenceContainerRegister.hpp>
+
 #include <QStringBuilder>
+
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/optional.hpp>
 
 using namespace qe::entity;
 using namespace qe::common;
@@ -107,6 +118,9 @@ namespace {
 	}
 
 }
+
+EntityDefPrivate::EntityDefPrivate()
+{}
 
 /**
  * \class EntityDefPrivate
@@ -288,3 +302,14 @@ bool EntityDefPrivate::isSequentialContainer() const noexcept
 	return SequenceContainerRegister::instance()
 			.contains( propertyType);
 }
+
+template
+void EntityDefPrivate::serialize<boost::archive::polymorphic_oarchive>(
+	boost::archive::polymorphic_oarchive& oa,
+	const unsigned int);
+
+template
+void EntityDefPrivate::serialize<boost::archive::polymorphic_iarchive>(
+	boost::archive::polymorphic_iarchive& ia,
+	const unsigned int);
+

@@ -29,6 +29,7 @@
 #include <qe/common/Optional.hpp>
 #include <qe/annotation/Model.hpp>
 #include <QLoggingCategory>
+#include <boost/serialization/nvp.hpp>
 #include <functional>
 
 namespace qe { namespace entity
@@ -41,6 +42,8 @@ namespace qe { namespace entity
     class QEENTITY_EXPORT Model : public qe::annotation::Model
 	{
 		friend class qe::entity::ModelRepository;
+		friend class qe::entity::RelationDef;
+		friend class boost::serialization::access;
 		public:
 
 			Model(
@@ -87,9 +90,15 @@ namespace qe { namespace entity
 			qe::common::optional<RelationDef> findRelationTo(
 				const Model& model) const noexcept;
 
+			template< class Archive>
+			void serialize( Archive& ar, const unsigned int )
+			{
+				ar & boost::serialization::make_nvp( "modelPrivate", d_ptr);
+			}
+
 		protected:
 			/// @brief Create and parse annotations from @p meta.
-			explicit Model( const QMetaObject* meta);
+			explicit Model( const QMetaObject* meta = nullptr);
 
 		private:
 			Q_DECLARE_PRIVATE(Model);

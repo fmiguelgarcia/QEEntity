@@ -24,11 +24,26 @@
  * $QE_END_LICENSE$
  */
 #include "RelationDef.hpp"
+
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
+#include <qe/common/serialization/QByteArray.hpp>
+#include <qe/common/serialization/QMetaEnum.hpp>
+
+#include <qe/annotation/ModelPrivate.hpp>
 #include <qe/entity/Model.hpp>
 #include <qe/entity/EntityDef.hpp>
+#include <qe/entity/EntityDefPrivate.hpp>
+
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/optional.hpp>
 
 using namespace qe::entity;
 using namespace std;
+
+RelationDef::RelationDef()
+{}
 
 RelationDef::RelationDef( 
 		const QByteArray& propertyName,
@@ -70,3 +85,12 @@ const Model& RelationDef::reference() const noexcept
 const EntityDefList& RelationDef::relationKey() const noexcept
 { return m_relationKey;}
 
+template
+void RelationDef::serialize<boost::archive::polymorphic_oarchive>(
+	boost::archive::polymorphic_oarchive& oa,
+	const unsigned int);
+
+template
+void RelationDef::serialize<boost::archive::polymorphic_iarchive>(
+	boost::archive::polymorphic_iarchive& ia,
+	const unsigned int);

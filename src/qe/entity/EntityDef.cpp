@@ -27,9 +27,16 @@
 
 #include "EntityDef.hpp"
 #include "EntityDefPrivate.hpp"
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
+#include <qe/common/serialization/QByteArray.hpp>
+#include <qe/common/serialization/QMetaEnum.hpp>
+#include <qe/annotation/ModelPrivate.hpp>
 #include <QMetaEnum>
 #include <QStringBuilder>
 #include <QMetaProperty>
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/optional.hpp>
 #include <utility>
 
 using namespace qe;
@@ -38,23 +45,8 @@ using namespace qe::common;
 using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcEntityDef, "com.dmious.qe.entity.EntityDef")
 
-
-/**
- * @brief It creates an entity definition
- * @param property Property name.
- * @param type Property type.
- * @param model It will use this model to extract annotations.
- */
-/*
-EntityDef::EntityDef( const QByteArray &propertyName, const int propertyType,
-				const QString& entityName, const uint entityMaxLength)
-	: d_ptr( new EntityDefPrivate(
-		propertyName,
-		propertyType,
-		entityName,
-		entityMaxLength
-{}
-*/
+EntityDef::EntityDef()
+{ }
 
 EntityDef::EntityDef(
 	const QByteArray &property,
@@ -211,3 +203,14 @@ optional<QMetaEnum> EntityDef::enumerator() const noexcept
 	const Q_D(EntityDef);
 	return d->metaEnum;
 }
+
+template
+void EntityDef::serialize<boost::archive::polymorphic_oarchive>(
+	boost::archive::polymorphic_oarchive& oa,
+	const unsigned int);
+
+template
+void EntityDef::serialize<boost::archive::polymorphic_iarchive>(
+	boost::archive::polymorphic_iarchive& ia,
+	const unsigned int);
+

@@ -28,8 +28,11 @@
 #include "ModelPrivate.hpp"
 #include "EntityDef.hpp"
 #include "RelationDef.hpp"
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <QMetaProperty>
 #include <QStringBuilder>
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
 #include <utility>
 #include <memory>
 
@@ -87,7 +90,7 @@ const EntityDefList& Model::primaryKeyDef() const noexcept
 	return d->primaryKey();
 }
 
-optional<RelationDef> Model::referenceManyToOne() const noexcept
+qe::common::optional<RelationDef> Model::referenceManyToOne() const noexcept
 {
 	const Q_D(Model);
 	return d->refManyToOne;
@@ -185,3 +188,14 @@ optional<RelationDef> Model::findRelationTo( const Model& model) const noexcept
 
 	return fk;
 }
+
+template
+void Model::serialize<boost::archive::polymorphic_oarchive>(
+	boost::archive::polymorphic_oarchive& oa,
+	const unsigned int);
+
+template
+void Model::serialize<boost::archive::polymorphic_iarchive>(
+	boost::archive::polymorphic_iarchive& ia,
+	const unsigned int);
+

@@ -1,15 +1,19 @@
 #include "QEEntityTest.hpp"
 #include "entity/book.hpp"
-
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <qe/entity/ModelRepository.hpp>
 #include <qe/entity/Model.hpp>
+#include <qe/entity/ModelPrivate.hpp>
 #include <qe/entity/EntityDef.hpp>
 #include <qe/entity/RelationDef.hpp>
 #include <QTest>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <memory>
+#include <sstream>
 
 using namespace qe::entity;
 using namespace std;
+using namespace boost;
 
 QEEntityTest::QEEntityTest()
 {
@@ -24,6 +28,13 @@ QEEntityTest::QEEntityTest()
 	m_chapterModel.reset(
 		new Model(
 			ModelRepository::instance().model( m_book->chapters.front().metaObject())));
+
+	std::ostringstream bookModelS11n;
+	archive::polymorphic_text_oarchive oa( bookModelS11n);
+	oa & serialization::make_nvp( "bookModel", *m_bookModel);
+	oa & serialization::make_nvp( "chapterModel", *m_chapterModel);
+
+	qDebug() << "Models: " << bookModelS11n.str().c_str() << endl;
 }
 
 QEEntityTest::~QEEntityTest()

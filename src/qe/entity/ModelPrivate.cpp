@@ -27,11 +27,20 @@
 
 #include "ModelPrivate.hpp"
 #include "EntityDef.hpp"
-#include <QStringBuilder>
+#include "EntityDefPrivate.hpp"
+
+#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
+#include <qe/common/serialization/QByteArray.hpp>
+#include <qe/common/serialization/QMetaEnum.hpp>
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/optional.hpp>
 #include <iterator>
 
 using namespace qe::entity;
 using namespace qe::common;
+using namespace boost;
 using namespace std;
 
 namespace {
@@ -218,7 +227,7 @@ void ModelPrivate::parseAnnotation(
 	}
 }
 
-optional<EntityDef> ModelPrivate::findEntityDef(
+qe::common::optional<EntityDef> ModelPrivate::findEntityDef(
 	const FindEntityDefByAutoIncrement& ) const noexcept
 {
 	return findEntityDef(
@@ -230,7 +239,7 @@ optional<EntityDef> ModelPrivate::findEntityDef(
 		});
 }
 
-optional<EntityDef> ModelPrivate::findEntityDef(
+qe::common::optional<EntityDef> ModelPrivate::findEntityDef(
 	const FindEntityDefByPropertyName& property) const noexcept
 {
 	return findEntityDef(
@@ -238,7 +247,7 @@ optional<EntityDef> ModelPrivate::findEntityDef(
 		{ return eDef.propertyName() == property.name;});
 }
 
-optional<EntityDef> ModelPrivate::findEntityDef(
+qe::common::optional<EntityDef> ModelPrivate::findEntityDef(
 	const FindEntityDefByEntityName& entity) const noexcept
 {
 	return findEntityDef(
@@ -246,10 +255,10 @@ optional<EntityDef> ModelPrivate::findEntityDef(
 		{ return colDef.entityName() == entity.name;});
 }
 
-optional<EntityDef> ModelPrivate::findEntityDef(
+qe::common::optional<EntityDef> ModelPrivate::findEntityDef(
 	EntityDefPredictate&& predicate) const noexcept
 {
-	optional<EntityDef> eDef;
+	qe::common::optional<EntityDef> eDef;
 	auto begin = std::begin( m_entityDefs);
 	auto end = std::end( m_entityDefs);
 
@@ -278,7 +287,7 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 
 		if( eDef.mappedType() == EntityDef::MappedType::OneToMany)
 		{
-			optional<Model> subModel = eDef.mappedModel();
+			qe::common::optional<Model> subModel = eDef.mappedModel();
 			if( subModel)
 			{
 				Model model = modelFromPrivate( this);
@@ -306,10 +315,12 @@ void ModelPrivate::pushBackEntityDef( const EntityDef& eDef)
 	assert( ! containsDuplicates(m_entityDefs));
 }
 
-#if 0
-void ModelPrivate::pushFrontEntityDef( const EntityDef& eDef)
-{
-	m_entityDefs.insert( begin(m_entityDefs), eDef);
-	assert( ! containsDuplicates(m_entityDefs));
-}
-#endif
+template
+void ModelPrivate::serialize<archive::polymorphic_oarchive>(
+	archive::polymorphic_oarchive& oa,
+	const unsigned int);
+
+template
+void ModelPrivate::serialize<archive::polymorphic_iarchive>(
+	archive::polymorphic_iarchive& ia,
+	const unsigned int);
