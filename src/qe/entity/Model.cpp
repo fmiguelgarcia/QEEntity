@@ -47,6 +47,7 @@ Q_LOGGING_CATEGORY( qe::entity::lcModel,
  * \since 1.0.0
  */
 
+
 Model::Model( QExplicitlySharedDataPointer<ModelPrivate>&& d)
 	: qe::annotation::Model( d)
 {}
@@ -187,6 +188,12 @@ optional<RelationDef> Model::findRelationTo( const Model& model) const noexcept
 		fk = d->refManyToOne;
 
 	return fk;
+}
+
+template< class Archive>
+void Model::serialize( Archive& ar, const unsigned int )
+{
+	ar & boost::serialization::make_nvp( "modelPrivate", d_ptr);
 }
 
 template

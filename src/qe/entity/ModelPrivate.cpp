@@ -36,6 +36,9 @@
 #include <boost/archive/polymorphic_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/optional.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/nvp.hpp>
+
 #include <iterator>
 
 using namespace qe::entity;
@@ -313,6 +316,17 @@ void ModelPrivate::pushBackEntityDef( const EntityDef& eDef)
 {
 	m_entityDefs.push_back( eDef);
 	assert( ! containsDuplicates(m_entityDefs));
+}
+
+template< class Archive>
+void ModelPrivate::serialize( Archive& ar, const unsigned int )
+{
+	using namespace boost::serialization;
+
+	ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(qe::annotation::ModelPrivate);
+	ar & make_nvp( "primaryKey", m_primaryKeyDef);
+	ar & make_nvp( "entities", m_entityDefs);
+	ar & make_nvp( "manyToOneRelation", refManyToOne);
 }
 
 template

@@ -47,6 +47,7 @@ namespace qe { namespace entity {
 	{
 		friend class boost::serialization::access;
 		friend class EntityDefPrivate;
+		friend class RelationDef;
 		Q_GADGET
 		public:
 			enum MappedType {
@@ -63,8 +64,8 @@ namespace qe { namespace entity {
 #endif
 
 			EntityDef(
-				const QByteArray &property,
-				const int type,
+				const QByteArray &property = QByteArray(),
+				const int type = 0,
 				const uint maxLength = 0,
 				const qe::common::optional<qe::entity::Model>& model =
 					qe::common::optional<qe::entity::Model>());
@@ -110,13 +111,9 @@ namespace qe { namespace entity {
 			void detach();
 
 			template< class Archive>
-			void serialize( Archive & ar, const unsigned int)
-			{
-				ar & BOOST_SERIALIZATION_NVP( d_ptr);
-			}
+			void serialize( Archive & ar, const unsigned int);
 
 		protected:
-			EntityDef();
 
 			QExplicitlySharedDataPointer<EntityDefPrivate> d_ptr;
 

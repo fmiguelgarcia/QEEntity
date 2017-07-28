@@ -8,8 +8,11 @@
 #include <qe/entity/RelationDef.hpp>
 #include <QTest>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
+#include <boost/archive/polymorphic_xml_oarchive.hpp>
 #include <memory>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 
 using namespace qe::entity;
 using namespace std;
@@ -29,12 +32,14 @@ QEEntityTest::QEEntityTest()
 		new Model(
 			ModelRepository::instance().model( m_book->chapters.front().metaObject())));
 
-	std::ostringstream bookModelS11n;
-	archive::polymorphic_text_oarchive oa( bookModelS11n);
+	// std::ostringstream bookModelS11n;
+	// std::ofstream bookModelS11n( "/tmp/bm.txt");
+	//archive::polymorphic_text_oarchive oa( std::cerr );
+	archive::polymorphic_xml_oarchive oa( std::cerr );
 	oa & serialization::make_nvp( "bookModel", *m_bookModel);
 	oa & serialization::make_nvp( "chapterModel", *m_chapterModel);
 
-	qDebug() << "Models: " << bookModelS11n.str().c_str() << endl;
+	// qDebug() << "Models: " << bookModelS11n.str().c_str() << endl;
 }
 
 QEEntityTest::~QEEntityTest()

@@ -32,6 +32,8 @@
 #include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <qe/common/serialization/QByteArray.hpp>
 #include <qe/common/serialization/QMetaEnum.hpp>
+#include <qe/common/serialization/QString.hpp>
+#include <qe/common/serialization/QVariant.hpp>
 
 #include <qe/annotation/ModelPrivate.hpp>
 #include <qe/entity/Model.hpp>
@@ -301,6 +303,23 @@ bool EntityDefPrivate::isSequentialContainer() const noexcept
 {
 	return SequenceContainerRegister::instance()
 			.contains( propertyType);
+}
+
+template< class Archive>
+void EntityDefPrivate::serialize( Archive & ar, const unsigned int )
+{
+	ar & BOOST_SERIALIZATION_NVP( entityName);
+	ar & BOOST_SERIALIZATION_NVP( defaultValue);
+	ar & BOOST_SERIALIZATION_NVP( propertyName);
+	ar & BOOST_SERIALIZATION_NVP( propertyType);
+	ar & BOOST_SERIALIZATION_NVP( maxLength);
+	ar & BOOST_SERIALIZATION_NVP( isAutoIncrement);
+	ar & BOOST_SERIALIZATION_NVP( isNullable);
+
+	ar & BOOST_SERIALIZATION_NVP( mappedType);
+	ar & BOOST_SERIALIZATION_NVP( mappedFetch);
+	ar & BOOST_SERIALIZATION_NVP( mappedModel);
+	ar & BOOST_SERIALIZATION_NVP( metaEnum);
 }
 
 template

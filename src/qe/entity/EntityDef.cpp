@@ -45,9 +45,6 @@ using namespace qe::common;
 using namespace std;
 Q_LOGGING_CATEGORY( qe::entity::lcEntityDef, "com.dmious.qe.entity.EntityDef")
 
-EntityDef::EntityDef()
-{ }
-
 EntityDef::EntityDef(
 	const QByteArray &property,
 	const int type,
@@ -202,6 +199,12 @@ optional<QMetaEnum> EntityDef::enumerator() const noexcept
 {
 	const Q_D(EntityDef);
 	return d->metaEnum;
+}
+
+template< class Archive>
+void EntityDef::serialize( Archive & ar, const unsigned int)
+{
+	ar & BOOST_SERIALIZATION_NVP( d_ptr);
 }
 
 template

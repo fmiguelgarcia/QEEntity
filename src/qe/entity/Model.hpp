@@ -29,7 +29,6 @@
 #include <qe/common/Optional.hpp>
 #include <qe/annotation/Model.hpp>
 #include <QLoggingCategory>
-#include <boost/serialization/nvp.hpp>
 #include <functional>
 
 namespace qe { namespace entity
@@ -91,10 +90,7 @@ namespace qe { namespace entity
 				const Model& model) const noexcept;
 
 			template< class Archive>
-			void serialize( Archive& ar, const unsigned int )
-			{
-				ar & boost::serialization::make_nvp( "modelPrivate", d_ptr);
-			}
+			void serialize( Archive& ar, const unsigned int );
 
 		protected:
 			/// @brief Create and parse annotations from @p meta.

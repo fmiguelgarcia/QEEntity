@@ -61,21 +61,7 @@ namespace qe { namespace entity {
 				const qe::common::optional<qe::entity::Model>& model);
 
 			template< class Archive>
-			void serialize( Archive & ar, const unsigned int )
-			{
-				ar & BOOST_SERIALIZATION_NVP( entityName);
-				ar & BOOST_SERIALIZATION_NVP( defaultValue);
-				ar & BOOST_SERIALIZATION_NVP( propertyName);
-				ar & BOOST_SERIALIZATION_NVP( propertyType);
-				ar & BOOST_SERIALIZATION_NVP( maxLength);
-				ar & BOOST_SERIALIZATION_NVP( isAutoIncrement);
-				ar & BOOST_SERIALIZATION_NVP( isNullable);
-
-				ar & BOOST_SERIALIZATION_NVP( mappedType);
-				ar & BOOST_SERIALIZATION_NVP( mappedFetch);
-				ar & BOOST_SERIALIZATION_NVP( mappedModel);
-				ar & BOOST_SERIALIZATION_NVP( metaEnum);
-			}
+			void serialize( Archive & ar, const unsigned int );
 
 		public:
 			QString entityName;					///< Entity name
