@@ -18,6 +18,7 @@ class QEEntityConan(ConanFile):
 
     def build(self):
         cmake = CMake( self)
+        cmake.definitions["QEENTITY_TEST"]="OFF"
         cmake.configure()
         cmake.build()
 

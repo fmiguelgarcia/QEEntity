@@ -1,6 +1,11 @@
 cmake_minimum_required ( VERSION 3.2)
 project (QEEntity)
-enable_testing()
+set( QEENTITY_TEST ON CACHE BOOL "Enable unit tests")
+
 
 add_subdirectory( src/qe/entity)
-add_subdirectory( test)
+
+if (QEENTITY_TEST)
+	enable_testing() 
+	add_subdirectory( test)
+endif()
