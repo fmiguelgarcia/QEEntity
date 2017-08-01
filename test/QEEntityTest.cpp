@@ -33,9 +33,9 @@ QEEntityTest::QEEntityTest()
 			ModelRepository::instance().model( m_book->chapters.front().metaObject())));
 
 	// std::ostringstream bookModelS11n;
-	// std::ofstream bookModelS11n( "/tmp/bm.txt");
+	ofstream bookModelS11n( "out.xml");
 	//archive::polymorphic_text_oarchive oa( std::cerr );
-	archive::polymorphic_xml_oarchive oa( std::cerr );
+	archive::polymorphic_xml_oarchive oa( bookModelS11n );
 	oa & serialization::make_nvp( "bookModel", *m_bookModel);
 	oa & serialization::make_nvp( "chapterModel", *m_chapterModel);
 
