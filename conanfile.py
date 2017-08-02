@@ -9,7 +9,7 @@ class QEEntityConan(ConanFile):
     license = "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
     generators = "cmake"
     description = "QE Annotated Entity library"
-    exports_sources = ["src/*", "test/*", "tools/*", "CMakeLists.txt"]
+    exports_sources = ["src/*", "test/*", "tools/*", "CMakeLists.txt", "!.*.swp"]
     options = { "qt_version": "ANY"}
 
     def configure(self):
@@ -18,7 +18,7 @@ class QEEntityConan(ConanFile):
 
     def build(self):
         cmake = CMake( self)
-        cmake.definitions["QEENTITY_TEST"]="OFF"
+        #cmake.definitions["QEENTITY_TEST"]="OFF"
         cmake.configure()
         cmake.build()
 
