@@ -24,27 +24,48 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/annotation/Model.hpp>
 #include <qe/entity/Global.hpp>
+
+#include <QExplicitlySharedDataPointer>
+#include <QLoggingCategory>
+/*
 #include <qe/entity/Types.hpp>
 #include <qe/common/Optional.hpp>
-#include <qe/annotation/Model.hpp>
-#include <QLoggingCategory>
 #include <functional>
+*/
 
 namespace qe { namespace entity
 {
-	class ModelPrivate;
-	class ModelRepository;
-	Q_DECLARE_LOGGING_CATEGORY( lcModel);
+	class ERItemPrivate;
+	Q_DECLARE_LOGGING_CATEGORY( lcERItem);
 
 	/// @brief This model parse the Orm annotations
-    class QEENTITY_EXPORT Model : public qe::annotation::Model
+	class QEENTITY_EXPORT ERItem
+		// public qe::annotation::Model
 	{
+#if 0
 		friend class qe::entity::ModelRepository;
 		friend class qe::entity::RelationDef;
 		friend class boost::serialization::access;
+#endif
 		public:
+			// explicit ERItem( const QMetaObject* mo = nullptr);
+			// ERItem( const ERItem& other);
+			explicit ERItem(
+				const QString& name,
+				const QByteArray& property,
+				const int type);
 
+			// Entity
+			const QString& name() const noexcept;
+			void setName( const QString& name) noexcept;
+
+			const QByteArray& propertyName() const noexcept;
+			const int propertyType() const noexcept;
+
+			virtual void detach();
+#if 0
 			Model(
 				const QString & name,
 				const EntityDefList& entities,
@@ -84,19 +105,25 @@ namespace qe { namespace entity
 			/// predicate.
 			qe::common::optional<EntityDef> findEntityDef(
 				EntityDefPredictate&& predicate) const noexcept;
-
+#endif
+#if 0
 			/// @brief It returns the foreign key definition for specific model. 
 			qe::common::optional<RelationDef> findRelationTo(
 				const Model& model) const noexcept;
+#endif
 
 			template< class Archive>
 			void serialize( Archive& ar, const unsigned int );
 
 		protected:
-			/// @brief Create and parse annotations from @p meta.
-			explicit Model( const QMetaObject* meta = nullptr);
+			QExplicitlySharedDataPointer<ERItemPrivate> d_ptr;
 
 		private:
-			Q_DECLARE_PRIVATE(Model);
+			QString m_entityName;		///< Entity name.
+
+			QByteArray m_propertyName;	///< Property name or nvp name.
+			int m_propertyType;			///< Property type.
+
+			Q_DECLARE_PRIVATE(ERItem);
 	};
 }}

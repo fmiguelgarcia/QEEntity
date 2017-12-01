@@ -1,11 +1,7 @@
 #include "QEEntityTest.hpp"
 #include "entity/book.hpp"
 #include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
-#include <qe/entity/ModelRepository.hpp>
-#include <qe/entity/Model.hpp>
-#include <qe/entity/ModelPrivate.hpp>
-#include <qe/entity/EntityDef.hpp>
-#include <qe/entity/RelationDef.hpp>
+
 #include <QTest>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_xml_oarchive.hpp>
@@ -26,7 +22,7 @@ QEEntityTest::QEEntityTest()
 
 	// Models
 	m_bookModel.reset(
-		new Model(
+		new ERItemModel(
 			ModelRepository::instance().model( m_book->metaObject())));
 	m_chapterModel.reset(
 		new Model(

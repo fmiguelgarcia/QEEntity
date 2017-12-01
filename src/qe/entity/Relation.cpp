@@ -23,16 +23,13 @@
  *
  * $QE_END_LICENSE$
  */
-#include "RelationDef.hpp"
+#include "Relation.hpp"
 
 #include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <qe/common/serialization/QByteArray.hpp>
 #include <qe/common/serialization/QMetaEnum.hpp>
 
 #include <qe/annotation/ModelPrivate.hpp>
-#include <qe/entity/Model.hpp>
-#include <qe/entity/EntityDef.hpp>
-#include <qe/entity/EntityDefPrivate.hpp>
 
 #include <boost/archive/polymorphic_iarchive.hpp>
 #include <boost/archive/polymorphic_oarchive.hpp>
@@ -42,6 +39,7 @@
 using namespace qe::entity;
 using namespace std;
 
+#if 0
 RelationDef::RelationDef()
 {}
 
@@ -85,21 +83,32 @@ const Model& RelationDef::reference() const noexcept
 const EntityDefList& RelationDef::relationKey() const noexcept
 { return m_relationKey;}
 
+#else
+
+Relation::Relation(
+	ERItemShd& source,
+	const ERItemShd& target)
+	: m_source( source), m_target( target)
+{}
+
+#endif
+
 template< class Archive>
-void RelationDef::serialize( Archive& ar, const unsigned int )
+void Relation::serialize( Archive& ar, const unsigned int )
 {
+	using namespace boost::serialization;
+
 	// ar & BOOST_SERIALIZATION_NVP( d_ptr);
-	ar & boost::serialization::make_nvp( "propertyName", m_propertyName);
-	ar & boost::serialization::make_nvp( "reference", m_reference);
-	ar & boost::serialization::make_nvp( "relationKey", m_relationKey);
+	ar & make_nvp( "source", *m_source);
+	ar & make_nvp( "target", *m_target);
 }
 
 template
-void RelationDef::serialize<boost::archive::polymorphic_oarchive>(
+void Relation::serialize<boost::archive::polymorphic_oarchive>(
 	boost::archive::polymorphic_oarchive& oa,
 	const unsigned int);
 
 template
-void RelationDef::serialize<boost::archive::polymorphic_iarchive>(
+void Relation::serialize<boost::archive::polymorphic_iarchive>(
 	boost::archive::polymorphic_iarchive& ia,
 	const unsigned int);

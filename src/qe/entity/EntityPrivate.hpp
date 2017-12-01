@@ -25,19 +25,23 @@
  *
  */
 #pragma once
-#include <qe/entity/EntityDef.hpp>
-#include <qe/entity/Model.hpp>
+#include <qe/common/Optional.hpp>
+#include <qe/entity/Entity.hpp>
+#include <qe/entity/Relation.hpp>
 #include <QSharedData>
 #include <memory>
 
 namespace qe { namespace entity {
 	class Model;
-	class EntityDefPrivate : public QSharedData
+
+	class EntityPrivate : public QSharedData
 	{
-		friend class boost::serialization::access;
+		template< class T>
+		using optional = qe::common::optional<T>;
+		// friend class boost::serialization::access;
 		private:
 			/// @note Only used by Serialization
-			EntityDefPrivate();
+			EntityPrivate();
 
 			void decodeProperties(const qe::entity::Model &model);
 			void decodeOneToManyAnnotatedRelations( const qe::entity::Model &model);
@@ -49,40 +53,39 @@ namespace qe { namespace entity {
 			bool isAssociativeContainer() const noexcept;
 
 		public:
-			EntityDefPrivate(
+			/*
+			EntityPrivate(
 				const QByteArray& property,
 				const int type,
-				const uint maxLength,
-				const qe::common::optional<qe::entity::Model>& model);
+				const EntityConstraints& constrains);
 
-			EntityDefPrivate(
+			EntityPrivate(
 				const QByteArray& property,
-				const QMetaEnum metaEnum,
-				const qe::common::optional<qe::entity::Model>& model);
+				const QMetaEnum metaEnum);
+				*/
 
+			// Other stuff
 			template< class Archive>
 			void serialize( Archive & ar, const unsigned int );
 
+			template< class Archive>
+			void save( Archive& ar, const unsigned int ) const;
+
+			template< class Archive>
+			void load( Archive& ar, const unsigned int );
+
+			template< class Archive>
+			void loadSaveCommon( Archive& ar, const unsigned int );
+
 		public:
-			QString entityName;					///< Entity name
-			QVariant defaultValue;				///< Default value.
+			QString name;					///< Entity name
+			EntityConstraints constrains;	///< Entity constrains
+			optional<Relation> relation;	///< Relation
 
 			// Property link
 			QByteArray propertyName;		///< Property name.
 			int propertyType;				///< Property type.
-
-			// Mapped Type
-			int mappedType;
-			int mappedFetch;
-			qe::common::optional<qe::entity::Model> mappedModel;
-
-			// Enum
-			qe::common::optional<QMetaEnum> metaEnum;	///< It stores meta-enum info.
-
-			// Constraints
-			uint maxLength 			= 0;
-			bool isAutoIncrement 	= false;
-			bool isNullable 		= true;
+			optional<QMetaEnum> metaEnum;	///< It stores meta-enum info.
 	};
 }}
 

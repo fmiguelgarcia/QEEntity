@@ -23,31 +23,41 @@
  *
  * $QE_END_LICENSE$
  */
-#include "Model.hpp"
-#include "ModelRepository.hpp"
-#include "ModelPrivate.hpp"
-#include "EntityDef.hpp"
-#include "RelationDef.hpp"
-#include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
-#include <QMetaProperty>
-#include <QStringBuilder>
-#include <boost/archive/polymorphic_iarchive.hpp>
-#include <boost/archive/polymorphic_oarchive.hpp>
-#include <utility>
-#include <memory>
+#include "ERItem.hpp"
+#include "ERItemPrivate.hpp"
 
 using namespace qe::entity;
-using namespace qe::common;
 using namespace std;
-Q_LOGGING_CATEGORY( qe::entity::lcModel,
-	"com.dmious.ipmo.qe.entity.model");
+Q_LOGGING_CATEGORY( qe::entity::lcERItem,
+	"com.dmious.ipmo.qe.entity.ERItem");
 
 /**
  * \class qe::entity::Model
  * \since 1.0.0
  */
 
+ERItem::ERItem(
+	const QString& entityName,
+	const QByteArray &property,
+	const int type)
+		: m_entityName( entityName)
+		,m_propertyName( property)
+		,m_propertyType( type)
+{}
 
+const QString& ERItem::name() const noexcept
+{ return m_entityName; }
+
+void ERItem::setName( const QString& name) noexcept
+{ m_entityName = name; }
+
+const QByteArray& ERItem::propertyName() const noexcept
+{ return m_propertyName;}
+
+const int ERItem::propertyType() const noexcept
+{ return m_propertyType;}
+
+#if 0
 Model::Model( QExplicitlySharedDataPointer<ModelPrivate>&& d)
 	: qe::annotation::Model( d)
 {}
@@ -97,6 +107,7 @@ qe::common::optional<RelationDef> Model::referenceManyToOne() const noexcept
 	return d->refManyToOne;
 }
 
+#if 0
 void Model::setReferenceManyToOne(
 	const QByteArray& propertyName,
 	const Model &reference)
@@ -134,7 +145,6 @@ void Model::setReferenceManyToOne(
 	// Copy ref
 	d->refManyToOne = fkDef;
 
-#if 1
 	// Update primary key.
 	/// \internal On relations One to many for simple types, the
 	/// auto-generated primary key (index) is not unique, and it represents
@@ -149,8 +159,8 @@ void Model::setReferenceManyToOne(
 		newPk.push_back( pk.front());
 		d->setPrimaryKey( newPk);
 	}
-#endif
 }
+#endif
 
 optional<EntityDef> Model::findEntityDef(const FindEntityDefByPropertyName& property) const noexcept
 {
@@ -179,6 +189,7 @@ optional<EntityDef> Model::findEntityDef(
 	return d->findEntityDef( std::move(predicate));
 }
 
+#if 0
 optional<RelationDef> Model::findRelationTo( const Model& model) const noexcept
 {
 	const Q_D(Model);
@@ -189,11 +200,13 @@ optional<RelationDef> Model::findRelationTo( const Model& model) const noexcept
 
 	return fk;
 }
+#endif
 
 template< class Archive>
 void Model::serialize( Archive& ar, const unsigned int )
 {
-	ar & boost::serialization::make_nvp( "modelPrivate", d_ptr);
+	ModelPrivate * d = d_func();
+	ar & boost::serialization::make_nvp( "modelPrivate", d);
 }
 
 template
@@ -206,3 +219,4 @@ void Model::serialize<boost::archive::polymorphic_iarchive>(
 	boost::archive::polymorphic_iarchive& ia,
 	const unsigned int);
 
+#endif

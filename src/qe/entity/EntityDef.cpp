@@ -26,7 +26,7 @@
  */
 
 #include "EntityDef.hpp"
-#include "EntityDefPrivate.hpp"
+#include "EntityPrivate.hpp"
 #include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <qe/common/serialization/QByteArray.hpp>
 #include <qe/common/serialization/QMetaEnum.hpp>
@@ -130,6 +130,7 @@ const QVariant& EntityDef::defaultValue() const noexcept
 	return d->defaultValue;
 }
 
+#if 0
 const EntityDef::MappedType EntityDef::mappedType() const noexcept
 {
 	const Q_D(EntityDef);
@@ -153,37 +154,19 @@ optional<qe::entity::Model> EntityDef::mappedModel() const noexcept
 	const Q_D(EntityDef);
 	return d->mappedModel;
 }
+#endif
 
-uint EntityDef::maxLength() const noexcept
+const EntityDefConstraints & EntityDef::constraints() const
 {
 	const Q_D(EntityDef);
-	return d->maxLength;
+	return d->constrains;
 }
 
-bool EntityDef::isAutoIncrement() const noexcept
+const optional<RelationDef>& EntityDef::relationDef() const
 {
 	const Q_D(EntityDef);
-	return d->isAutoIncrement;
+	return d->relationDef;
 }
-
-void EntityDef::setAutoIncrement( const bool value)
-{
-	Q_D(EntityDef);
-	d->isAutoIncrement = value;
-}
-
-bool EntityDef::isNullable() const noexcept
-{
-	const Q_D(EntityDef);
-	return d->isNullable;
-}
-
-void EntityDef::setNullable(const bool value)
-{
-	Q_D(EntityDef);
-	d->isNullable = value;
-}
-
 
 /// @brief It checks if this entity definition is an Enum.
 bool EntityDef::isEnum() const noexcept
@@ -199,6 +182,11 @@ optional<QMetaEnum> EntityDef::enumerator() const noexcept
 {
 	const Q_D(EntityDef);
 	return d->metaEnum;
+}
+
+EntityDefPrivate* EntityDef::shdData() const noexcept
+{
+	return d_ptr.data();
 }
 
 template< class Archive>

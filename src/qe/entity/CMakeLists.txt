@@ -7,18 +7,11 @@ set( QEEntity_BUILD_VERSION 0)
 # Source
 set( QEEntity_SRCS
 	Global.hpp
-	OneToManyAdapter.cpp
-	AbstractS11nContext.cpp
-	AbstractSerializer.cpp
 	Types.cpp
-	SequenceContainerRegister.cpp
-	AssociativeContainerRegister.cpp
-	EntityDefPrivate.cpp
-	EntityDef.cpp
-	RelationDef.cpp
-	ModelPrivate.cpp
-	Model.cpp
-	ModelRepository.cpp)
+	ERItem.cpp
+	EntityPrivate.cpp Entity.cpp
+	Relation.cpp
+)
 add_definitions( -DQEENTITY_LIBRARY)
 
 # Link

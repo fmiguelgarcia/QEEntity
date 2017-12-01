@@ -35,20 +35,21 @@ class QObject;
 namespace qe { namespace entity { 
 
 	// Forward declarations
-	class EntityDef;
-	class RelationDef;
-	class Model;
+	class ERItem;
+	using ERItemShd = std::shared_ptr<ERItem>;
+	using ERItemList = std::vector<ERItem>;
 
-	using EntityDefList = std::vector<EntityDef>;
-	using EntityDefPredictate = std::function< bool( const EntityDef& )>;
-	using RelationDefList= std::vector<RelationDef>;
+	// using EntityDefPredictate = std::function< bool( const EntityDef& )>;
+	// using RelationDefList= std::vector<RelationDef>;
 
+#if 0
 	struct FindEntityDefByPropertyName { const QByteArray name; };
 	struct FindEntityDefByEntityName { const QString name; };
 	struct FindEntityDefByAutoIncrement {};
 
 	// Context
 	using ObjectContext = std::deque<QObject*>;
+#endif
 
 	// Tags
 	namespace tags {

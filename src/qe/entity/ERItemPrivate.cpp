@@ -24,11 +24,7 @@
  * $QE_END_LICENSE$
  *
  */
-
-#include "ModelPrivate.hpp"
-#include "EntityDef.hpp"
-#include "EntityDefPrivate.hpp"
-
+#include 
 #include <qe/common/serialization/QExplicitlySharedDataPointer.hpp>
 #include <qe/common/serialization/QByteArray.hpp>
 #include <qe/common/serialization/QMetaEnum.hpp>
@@ -237,8 +233,8 @@ qe::common::optional<EntityDef> ModelPrivate::findEntityDef(
 		[]( const EntityDef& colDef) -> bool
 		{
 			return
-				colDef.isAutoIncrement()
-				&& colDef.mappedType() == EntityDef::MappedType::NoMappedType;
+				colDef.constraints().isAutoIncrement
+				&& ! colDef.relationDef() ;
 		});
 }
 
@@ -282,13 +278,13 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 	/// @internal Fields of PK cannot be null. These limitation is found
 	/// in several RDBMs.
 	for( EntityDef& eDef : m_primaryKeyDef)
-		eDef.setNullable( false);
+		eDef.shdData()->constrains.isNullable = false;
 
+#if 0
 	// Update ManyToOne references.
 	for( EntityDef& eDef : m_entityDefs)
 	{
-
-		if( eDef.mappedType() == EntityDef::MappedType::OneToMany)
+		if( eDef.relationDef())
 		{
 			qe::common::optional<Model> subModel = eDef.mappedModel();
 			if( subModel)
@@ -301,6 +297,7 @@ void ModelPrivate::setPrimaryKey( const EntityDefList& pk)
 			}
 		}
 	}
+#endif
 }
 
 const EntityDefList& ModelPrivate::entityDefs() const noexcept
@@ -323,7 +320,7 @@ void ModelPrivate::serialize( Archive& ar, const unsigned int )
 {
 	using namespace boost::serialization;
 
-	ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(qe::annotation::ModelPrivate);
+	ar & make_nvp( "base", base_object<qe::annotation::ModelPrivate>(*this));
 	ar & make_nvp( "primaryKey", m_primaryKeyDef);
 	ar & make_nvp( "entities", m_entityDefs);
 	ar & make_nvp( "manyToOneRelation", refManyToOne);

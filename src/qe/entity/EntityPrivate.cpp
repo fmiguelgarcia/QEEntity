@@ -25,7 +25,7 @@
  *
  */
 
-#include "EntityDefPrivate.hpp"
+#include "EntityPrivate.hpp"
 #include "ModelRepository.hpp"
 
 #include <qe/common/Exception.hpp>
@@ -36,7 +36,6 @@
 #include <qe/common/serialization/QVariant.hpp>
 
 #include <qe/annotation/ModelPrivate.hpp>
-#include <qe/entity/Model.hpp>
 #include <qe/entity/AssociativeContainerRegister.hpp>
 #include <qe/entity/SequenceContainerRegister.hpp>
 
@@ -44,6 +43,7 @@
 
 #include <boost/archive/polymorphic_iarchive.hpp>
 #include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/split_member.hpp>
 #include <boost/serialization/optional.hpp>
 
 using namespace qe::entity;
@@ -53,16 +53,16 @@ using namespace std;
 namespace {
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
-	EntityDef::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
+	Entity::MappingType toMappingType( const QString& mappingTypeStr, bool *enumOk)
 	{
 		static vector<QString> strValues = { "NoMappedType", "OneToOne", "OneToMany", "ManyToOne", "ManyToMany" };
-		EntityDef::MappepType mt = EntityDef::MappedType::NoMappedType;
+		Entity::MappepType mt = Entity::MappedType::NoMappedType;
 		auto itr = find( begin(strValues), end(strValues), mappingTypeStr);
 		if( enumOk )
 			*enumOk = (itr != end(strValues));
 
 		if( itr != end(strValues))
-			mt = static_cast<EntityDef::MappedType>( distance( begin(strValues), itr));
+			mt = static_cast<Entity::MappedType>( distance( begin(strValues), itr));
 
 		return mt;
 	}
@@ -84,7 +84,7 @@ namespace {
 	}
 #endif
 
-	EntityDef::MappedType decodeOneToManyRelation(
+	Entity::MappedType decodeOneToManyRelation(
 		const qe::annotation::Model & model,
 		const QString& propName)
 	{
@@ -95,13 +95,13 @@ namespace {
 			.toString();
 
 #if ( QT_VERSION >= QT_VERSION_CHECK( 5, 5, 0))
-		EntityDef::MappedType mappedType = static_cast<EntityDef::MappedType>(
-			QMetaEnum::fromType< EntityDef::MappedType>()
+		Entity::MappedType mappedType = static_cast<Entity::MappedType>(
+			QMetaEnum::fromType< Entity::MappedType>()
 				.keyToValue(
 					mappedTypeStr.toUtf8().constData(),
 					&enumOk));
 #else
-		EntityDef::MappedType mappedType = toMappedType( mappedTypeStr, &enumOk);
+		Entity::MappedType mappedType = toMappedType( mappedTypeStr, &enumOk);
 #endif
 
 		if( !enumOk)
@@ -121,22 +121,22 @@ namespace {
 
 }
 
-EntityDefPrivate::EntityDefPrivate()
+EntityPrivate::EntityPrivate()
 {}
 
 /**
- * \class EntityDefPrivate
+ * \class EntityPrivate
  * \since 1.0.0
  */
 
-EntityDefPrivate::EntityDefPrivate(
+EntityPrivate::EntityPrivate(
 	const QByteArray& property,
 	const int type,
 	const uint maxLength,
 	const optional<Model> & model)
 	: propertyName( property),
 	propertyType( type),
-	maxLength( maxLength)
+	constrains( maxLength)
 {
 	if( model)
 	{
@@ -151,8 +151,7 @@ EntityDefPrivate::EntityDefPrivate(
 		}
 		catch ( const common::Exception & error )
 		{
-			qCWarning( lcEntityDef) << error.what();
-			mappedType = EntityDef::MappedType::NoMappedType;
+			qCWarning( lcEntity) << error.what();
 		}
 	}
 
@@ -160,48 +159,50 @@ EntityDefPrivate::EntityDefPrivate(
 			|| type == QMetaType::QChar
 			|| type == QMetaType::SChar
 			|| type == QMetaType::UChar)
-		this->maxLength = 1;
+		constrains.maxLength = 1;
 
 	if( entityName.isEmpty())
 		entityName = QString::fromUtf8( propertyName);
 }
 
-EntityDefPrivate::EntityDefPrivate(
+EntityPrivate::EntityPrivate(
 	const QByteArray& property,
 	const QMetaEnum me,
 	const optional<Model> &model)
-	: EntityDefPrivate( property, QMetaType::Int, 0, model)
+	: EntityPrivate( property, QMetaType::Int, 0, model)
 {
 	metaEnum = me;
 }
 
-void EntityDefPrivate::decodeProperties(const Model &model)
+void EntityPrivate::decodeProperties(const Model &model)
 {
 	entityName = model.annotation( propertyName,
 		qe::entity::tags::entityName()).value( propertyName).toString();
 
-	isNullable = model.annotation( propertyName,
+	constrains.isNullable = model.annotation( propertyName,
 			tags::isNullable()).value( true).toBool();
 
-	isAutoIncrement = model.annotation( propertyName,
+	constrains.isAutoIncrement = model.annotation( propertyName,
 			tags::isAutoIncrementable()).value( false).toBool();
 
-	maxLength = model.annotation( propertyName,
+	constrains.maxLength = model.annotation( propertyName,
 			tags::entityMaxLength()).value( 0).toUInt();
 }
 
-void EntityDefPrivate::decodeOneToManyAnnotatedRelations(const qe::entity::Model &model)
+void EntityPrivate::decodeOneToManyAnnotatedRelations(const qe::entity::Model &model)
 {
+
+#if 0
 	QString mappingEntityName = model.annotation( propertyName,
 				  tags::mappingEntity()).value().toString();
 	mappedType = decodeOneToManyRelation( model, propertyName);
 
 	// By default use OneToMany mapping type when mapping Entity is used.
 	if( ! mappingEntityName.isEmpty()
-			&& mappedType == EntityDef::MappedType::NoMappedType)
-		mappedType = EntityDef::MappedType::OneToMany;
+			&& mappedType == Entity::MappedType::NoMappedType)
+		mappedType = Entity::MappedType::OneToMany;
 
-	if( mappedType != EntityDef::MappedType::NoMappedType)
+	if( mappedType != Entity::MappedType::NoMappedType)
 	{
 		if( ! mappingEntityName.isEmpty())
 		{
@@ -228,68 +229,106 @@ void EntityDefPrivate::decodeOneToManyAnnotatedRelations(const qe::entity::Model
 					eDef.propertyName(),
 					model);
 #else
-			mappedType = EntityDef::MappedType::NoMappedType;
+			mappedType = Entity::MappedType::NoMappedType;
 			Exception::makeAndThrow(
 				QStringLiteral( "QE Entity does NOT support One to Many relations for simple types"));
 #endif
 		}
 	}
+#endif
 }
 
-void EntityDefPrivate::decodePointerRelations( const qe::entity::Model &model)
+void EntityPrivate::decodePointerRelations( const qe::entity::Model &model)
 { }
 
-void EntityDefPrivate::decodeSequentialContainerRelations(
+/// Relations one to many.
+void EntityPrivate::decodeSequentialContainerRelations(
 	const qe::entity::Model &model)
 {
 	if( isSequentialContainer())
 	{
-		const QString modelName = model.name() % "_seq_" % propertyName;
 		const auto seqContainerInfo = SequenceContainerRegister::instance()
 				.value( propertyType);
+		const QString modelName = model.name() % "_seq_" % propertyName;
 
-		EntityDef value { propertyName, seqContainerInfo.elementTypeId};
-		EntityDef key {
-				addPostfix( propertyName, "_idx"),
-				QVariant::Type::Int};
+		Entity idx { "idx", QVariant::Type::Int};
 
-		mappedType = EntityDef::MappedType::OneToMany;
-		mappedModel = Model {
-			modelName,
-			EntityDefList{ key, value},
-			EntityDefList{ key} };
-		mappedModel->setReferenceManyToOne( propertyName, model);
+		optional<Entity> value;
+
+		// Simple type
+		if( seqContainerInfo.elementTypeId < QMetaType::User)
+			value = Entity { "value", seqContainerInfo.elementTypeId};
+		else
+			value = Entity { "value",
+				ModelRepository::instance().model(
+					QMetaType::metaObjectForType( seqContainerInfo.elementTypeId))};
+
+		Model target {
+				modelName,
+				EntityList{ idx, *value},
+				EntityList{ idx} };
+
+		relationDef = RelationDef( *this, target);
 	}
 }
 
-void EntityDefPrivate::decodeAssociativeContainerRelations( const qe::entity::Model &model)
+void EntityPrivate::decodeAssociativeContainerRelations( const qe::entity::Model &model)
 {
 	if( isAssociativeContainer())
 	{
-		const QString modelName = model.name() % "_assoc_" % propertyName;
+		optional<Model> keyModel;
+		optional<Model> valueModel;
 		AssociativeContainerInfo aci = AssociativeContainerRegister::instance()
 				.value( propertyType);
 
-		EntityDef assocKey {
-				addPostfix( propertyName, "_key"),
-				aci.keyTypeId};
-		EntityDef assocVal {
-				addPostfix( propertyName, "_value"),
-				aci.valueTypeId};
-		EntityDef key {
-				addPostfix( propertyName, "_idx"),
-				QVariant::Type::Int};
+		// Value
+		if( aci.valueTypeId >= QMetaType::User )
+		{
+			valueModel = ModelRepository::instance().model(
+					QMetaType::metaObjectForType( aci.valueTypeId));
+		}
+		else
+		{
+			const QString modelName = model.name() % "_assoc_value_" % propertyName;
 
-		mappedType = EntityDef::MappedType::OneToMany;
-		mappedModel = Model {
+			Entity key { "idx", QVariant::Type::Int};
+			Entity assocVal {
+				addPostfix( propertyName, "value"),
+				aci.valueTypeId};
+
+			valueModel = Model(
 				modelName,
-				EntityDefList{ key, assocKey, assocVal},
-				EntityDefList{ key}};
-		mappedModel->setReferenceManyToOne( propertyName, model);
+				EntityList { key, assocVal },
+				EntityList { key });
+		}
+
+		// key
+		if( aci.keyTypeId >= QMetaType::User)
+		{
+			keyModel = ModelRepository::instance().model(
+					QMetaType::metaObjectForType( aci.keyTypeId));
+		}
+		else
+		{
+			const QString modelName = model.name() % "_assoc_key_" % propertyName;
+
+			Entity key { "idx", QVariant::Type::Int};
+			Entity assocKey { "key", aci.keyTypeId };
+			keyModel = Model {
+				modelName,
+				EntityList { key, assocKey },
+				EntityList { key }
+			};
+		}
+
+
+
+
+
 	}
 }
 
-bool EntityDefPrivate::isAssociativeContainer() const noexcept
+bool EntityPrivate::isAssociativeContainer() const noexcept
 {
 	if( propertyType < QMetaType::User)
 		return false;
@@ -299,36 +338,56 @@ bool EntityDefPrivate::isAssociativeContainer() const noexcept
 }
 
 
-bool EntityDefPrivate::isSequentialContainer() const noexcept
+bool EntityPrivate::isSequentialContainer() const noexcept
 {
 	return SequenceContainerRegister::instance()
 			.contains( propertyType);
 }
 
-template< class Archive>
-void EntityDefPrivate::serialize( Archive & ar, const unsigned int )
-{
-	ar & BOOST_SERIALIZATION_NVP( entityName);
-	ar & BOOST_SERIALIZATION_NVP( defaultValue);
-	ar & BOOST_SERIALIZATION_NVP( propertyName);
-	ar & BOOST_SERIALIZATION_NVP( propertyType);
-	ar & BOOST_SERIALIZATION_NVP( maxLength);
-	ar & BOOST_SERIALIZATION_NVP( isAutoIncrement);
-	ar & BOOST_SERIALIZATION_NVP( isNullable);
+// Serialization
+// ============================================================
 
-	ar & BOOST_SERIALIZATION_NVP( mappedType);
-	ar & BOOST_SERIALIZATION_NVP( mappedFetch);
-	ar & BOOST_SERIALIZATION_NVP( mappedModel);
+template< class Archive>
+void EntityPrivate::loadSaveCommon( Archive& ar, const unsigned int )
+{
+	ar & BOOST_SERIALIZATION_NVP( name);
+	ar & BOOST_SERIALIZATION_NVP( propertyType);
 	ar & BOOST_SERIALIZATION_NVP( metaEnum);
+
+	ar & BOOST_SERIALIZATION_NVP( constrains);
+	ar & BOOST_SERIALIZATION_NVP( relation);
+}
+
+template< class Archive>
+void EntityPrivate::load( Archive& ar, const unsigned int version)
+{
+	QString sPropertyName;
+	ar >> boost::serialization::make_nvp( "propertyName", sPropertyName);
+
+	loadSaveCommon( ar, version);
+}
+
+template< class Archive>
+void EntityPrivate::save( Archive& ar, const unsigned int version) const
+{
+	const QString sPropertyName = QString::fromLocal8Bit( propertyName);
+	ar << boost::serialization::make_nvp( "propertyName", sPropertyName);
+
+	const_cast<EntityPrivate*>(this)->loadSaveCommon( ar, version);
+}
+
+template< class Archive>
+void EntityPrivate::serialize( Archive & ar, const unsigned int version)
+{
+	boost::serialization::split_member( ar, *this, version);
 }
 
 template
-void EntityDefPrivate::serialize<boost::archive::polymorphic_oarchive>(
+void EntityPrivate::serialize<boost::archive::polymorphic_oarchive>(
 	boost::archive::polymorphic_oarchive& oa,
 	const unsigned int);
 
 template
-void EntityDefPrivate::serialize<boost::archive::polymorphic_iarchive>(
+void EntityPrivate::serialize<boost::archive::polymorphic_iarchive>(
 	boost::archive::polymorphic_iarchive& ia,
 	const unsigned int);
-

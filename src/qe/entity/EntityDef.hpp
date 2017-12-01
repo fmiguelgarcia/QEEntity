@@ -39,6 +39,7 @@
 namespace qe { namespace entity {
 	class Model;
 	class EntityDefPrivate;
+	class EntityDefConstraints;
 	Q_DECLARE_LOGGING_CATEGORY( lcEntityDef);
 
 	/// @brief This class defines the relation between a property and a database
@@ -48,6 +49,7 @@ namespace qe { namespace entity {
 		friend class boost::serialization::access;
 		friend class EntityDefPrivate;
 		friend class RelationDef;
+		friend class ModelPrivate;
 		Q_GADGET
 		public:
 			enum MappedType {
@@ -86,27 +88,29 @@ namespace qe { namespace entity {
 			bool operator==( const EntityDef& other) const noexcept;
 			bool operator<( const EntityDef& other) const noexcept;
 
+			// Entity
 			const QString& entityName() const noexcept;
 			void setEntityName( const QString& name) noexcept;
 
+			const QVariant& defaultValue() const noexcept;
+
+			// Property
 			const QByteArray& propertyName() const noexcept;
 			const int propertyType() const noexcept;
 
-			const QVariant& defaultValue() const noexcept;
+			bool isEnum() const noexcept;
+			qe::common::optional<QMetaEnum> enumerator() const noexcept;
 
+			// Constraints and relations
+#if 0
 			const MappedType mappedType() const noexcept;
 			void setMappedType( const MappedType mt) noexcept;
 			const MappedFetch mappedFetch() const noexcept;
 			qe::common::optional<qe::entity::Model> mappedModel() const noexcept;
-
-			uint maxLength() const noexcept;
-			bool isAutoIncrement() const noexcept;
-			void setAutoIncrement( const bool value = true );
-			bool isNullable() const noexcept;
-			void setNullable( const bool value = true);
-
-			bool isEnum() const noexcept;
-			qe::common::optional<QMetaEnum> enumerator() const noexcept;
+#else
+			const qe::entity::EntityDefConstraints& constraints() const;
+			const qe::common::optional<qe::entity::RelationDef>& relationDef() const;
+#endif
 
 			void detach();
 
@@ -114,8 +118,9 @@ namespace qe { namespace entity {
 			void serialize( Archive & ar, const unsigned int);
 
 		protected:
-
 			QExplicitlySharedDataPointer<EntityDefPrivate> d_ptr;
+
+			EntityDefPrivate* shdData() const noexcept;
 
 		private:
 			Q_DECLARE_PRIVATE( EntityDef);

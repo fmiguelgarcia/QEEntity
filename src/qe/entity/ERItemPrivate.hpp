@@ -27,29 +27,28 @@
 
 #pragma once
 #include <qe/annotation/ModelPrivate.hpp>
-#include <qe/entity/RelationDef.hpp>
-#include <qe/entity/Model.hpp>
 #include <qe/entity/Types.hpp>
 
 class QMetaProperty;
 namespace qe { namespace entity {
 
-	class ModelPrivate : public qe::annotation::ModelPrivate
+	class ERItemPrivate //: public qe::annotation::ModelPrivate
 	{
+#if 0
 		friend class boost::serialization::access;
 		public:
-			explicit ModelPrivate(
+			explicit ERItemPrivate(
 				const QMetaObject* meta = nullptr);
-			ModelPrivate (
+			ERItemPrivate (
 				const QString & name,
-				const EntityDefList& entities,
-				const EntityDefList& primaryKey);
+				const ERItemList& entities,
+				const ERItemList& primaryKey);
 
-			const EntityDefList& primaryKey() const noexcept;
-			void setPrimaryKey( const EntityDefList& pk);
+			virtual const ERItemList& primaryKey() const noexcept;
+			virtual void setPrimaryKey( const ERItemList& pk);
 
-			const EntityDefList& entityDefs() const noexcept;
-			void setEntityDefs( const EntityDefList& eDefs);
+			const ERItemList& entityDefs() const noexcept;
+			void setEntityDefs( const ERItemList& eDefs);
 			void pushBackEntityDef( const EntityDef& eDef);
 
 			void parseAnnotations( const QMetaObject* metaObj);
@@ -77,8 +76,9 @@ namespace qe { namespace entity {
 				const QMetaObject* metaObj,
 				const QMetaProperty& property);
 
-			EntityDefList m_primaryKeyDef;		///< Model primary key definition.
-			EntityDefList m_entityDefs;			///< Model column definitions.
+			ERItemList m_primaryKeyDef;		///< Model primary key definition.
+			ERItemList m_entityDefs;			///< Model column definitions.
+#endif
 	};
 }}
 

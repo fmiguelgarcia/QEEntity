@@ -24,17 +24,19 @@
  * $QE_END_LICENSE$
  */
 #pragma once
+#include <qe/entity/ERItem.hpp>
 #include <qe/entity/Global.hpp>
-#include <qe/entity/Model.hpp>
+#include <qe/entity/Types.hpp>
 
 namespace qe { namespace entity { 
-	class RelationDefPrivate;
+	class RelationPrivate;
 
 	/// @brief Foreign key definition.
-	class QEENTITY_EXPORT RelationDef
+	class QEENTITY_EXPORT Relation : public ERItem
 	{
-		friend class boost::serialization::access;
+		// friend class boost::serialization::access;
 		public:
+#if 0
 			/// @brief Constructor.
 			/// @param propertyName Property name.
 			/// @param reference Reference entity.
@@ -53,11 +55,6 @@ namespace qe { namespace entity {
 
 			const EntityDefList& relationKey() const noexcept;
 
-			template< class Archive>
-			void serialize( Archive& ar, const unsigned int );
-
-		protected:
-			RelationDefPrivate* d_ptr;
 
 		private:
 			/// @note Used only by serialization
@@ -66,7 +63,22 @@ namespace qe { namespace entity {
 			QByteArray m_propertyName;
 			Model m_reference;
 			EntityDefList m_relationKey;
+#else
+		Relation(
+			ERItemShd& source,
+			const ERItemShd& target);
 
-			Q_DECLARE_PRIVATE( RelationDef);
+#endif
+		template< class Archive>
+			void serialize( Archive& ar, const unsigned int );
+
+		protected:
+			RelationPrivate* d_ptr;
+
+		private:
+			ERItemShd m_source;
+			ERItemShd m_target;
+
+			Q_DECLARE_PRIVATE( Relation);
 	};
 }}
